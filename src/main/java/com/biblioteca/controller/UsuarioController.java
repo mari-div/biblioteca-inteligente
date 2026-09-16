@@ -1,7 +1,9 @@
 package com.biblioteca.controller;
 
+import com.biblioteca.dto.UsuarioRequest;
 import com.biblioteca.model.Usuario;
 import com.biblioteca.service.UsuarioService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,13 +32,27 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public Usuario guardar(@RequestBody Usuario usuario) {
+    public Usuario guardar(@Valid @RequestBody UsuarioRequest request) {
+        Usuario usuario = new Usuario();
+        usuario.setNombre(request.getNombre());
+        usuario.setEmail(request.getEmail());
+        usuario.setPassword(request.getPassword());
+        usuario.setRol(request.getRol());
+
         return usuarioService.guardar(usuario);
     }
 
     @PutMapping("/{id}")
-    public Usuario actualizar(@PathVariable Long id,
-                              @RequestBody Usuario usuario) {
+    public Usuario actualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody UsuarioRequest request) {
+
+        Usuario usuario = new Usuario();
+        usuario.setNombre(request.getNombre());
+        usuario.setEmail(request.getEmail());
+        usuario.setPassword(request.getPassword());
+        usuario.setRol(request.getRol());
+
         return usuarioService.actualizar(id, usuario);
     }
 

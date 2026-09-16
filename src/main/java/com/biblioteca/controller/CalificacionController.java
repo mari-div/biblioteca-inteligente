@@ -1,7 +1,9 @@
 package com.biblioteca.controller;
 
+import com.biblioteca.dto.CalificacionRequest;
 import com.biblioteca.model.Calificacion;
 import com.biblioteca.service.CalificacionService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,13 +32,29 @@ public class CalificacionController {
     }
 
     @PostMapping
-    public Calificacion guardar(@RequestBody Calificacion calificacion) {
+    public Calificacion guardar(
+            @Valid @RequestBody CalificacionRequest request) {
+
+        Calificacion calificacion = new Calificacion();
+        calificacion.setIdUsuario(request.getIdUsuario());
+        calificacion.setIdLibro(request.getIdLibro());
+        calificacion.setPuntuacion(request.getPuntuacion());
+        calificacion.setComentario(request.getComentario());
+
         return calificacionService.guardar(calificacion);
     }
 
     @PutMapping("/{id}")
-    public Calificacion actualizar(@PathVariable Long id,
-                                   @RequestBody Calificacion calificacion) {
+    public Calificacion actualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody CalificacionRequest request) {
+
+        Calificacion calificacion = new Calificacion();
+        calificacion.setIdUsuario(request.getIdUsuario());
+        calificacion.setIdLibro(request.getIdLibro());
+        calificacion.setPuntuacion(request.getPuntuacion());
+        calificacion.setComentario(request.getComentario());
+
         return calificacionService.actualizar(id, calificacion);
     }
 
