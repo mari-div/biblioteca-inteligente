@@ -1,7 +1,9 @@
 package com.biblioteca.controller;
 
+import com.biblioteca.dto.ReservaRequest;
 import com.biblioteca.model.Reserva;
 import com.biblioteca.service.ReservaService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,13 +32,29 @@ public class ReservaController {
     }
 
     @PostMapping
-    public Reserva guardar(@RequestBody Reserva reserva) {
+    public Reserva guardar(
+            @Valid @RequestBody ReservaRequest request) {
+
+        Reserva reserva = new Reserva();
+
+        reserva.setIdUsuario(request.getIdUsuario());
+        reserva.setIdLibro(request.getIdLibro());
+        reserva.setEstado(request.getEstado());
+
         return reservaService.guardar(reserva);
     }
 
     @PutMapping("/{id}")
-    public Reserva actualizar(@PathVariable Long id,
-                              @RequestBody Reserva reserva) {
+    public Reserva actualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody ReservaRequest request) {
+
+        Reserva reserva = new Reserva();
+
+        reserva.setIdUsuario(request.getIdUsuario());
+        reserva.setIdLibro(request.getIdLibro());
+        reserva.setEstado(request.getEstado());
+
         return reservaService.actualizar(id, reserva);
     }
 

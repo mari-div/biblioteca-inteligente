@@ -1,7 +1,9 @@
 package com.biblioteca.controller;
 
+import com.biblioteca.dto.LibroRequest;
 import com.biblioteca.model.Libro;
 import com.biblioteca.service.LibroService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,13 +32,33 @@ public class LibroController {
     }
 
     @PostMapping
-    public Libro guardar(@RequestBody Libro libro) {
+    public Libro guardar(@Valid @RequestBody LibroRequest request) {
+        Libro libro = new Libro();
+
+        libro.setTitulo(request.getTitulo());
+        libro.setIdAutor(request.getIdAutor());
+        libro.setIsbn(request.getIsbn());
+        libro.setIdGenero(request.getIdGenero());
+        libro.setDescripcion(request.getDescripcion());
+        libro.setDisponible(request.getDisponible());
+
         return libroService.guardar(libro);
     }
 
     @PutMapping("/{id}")
-    public Libro actualizar(@PathVariable Long id,
-                            @RequestBody Libro libro) {
+    public Libro actualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody LibroRequest request) {
+
+        Libro libro = new Libro();
+
+        libro.setTitulo(request.getTitulo());
+        libro.setIdAutor(request.getIdAutor());
+        libro.setIsbn(request.getIsbn());
+        libro.setIdGenero(request.getIdGenero());
+        libro.setDescripcion(request.getDescripcion());
+        libro.setDisponible(request.getDisponible());
+
         return libroService.actualizar(id, libro);
     }
 
