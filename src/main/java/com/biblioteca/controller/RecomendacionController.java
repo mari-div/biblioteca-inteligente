@@ -1,7 +1,9 @@
 package com.biblioteca.controller;
 
+import com.biblioteca.dto.RecomendacionRequest;
 import com.biblioteca.model.Recomendacion;
 import com.biblioteca.service.RecomendacionService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,14 +32,27 @@ public class RecomendacionController {
     }
 
     @PostMapping
-    public Recomendacion guardar(@RequestBody Recomendacion recomendacion) {
+    public Recomendacion guardar(
+            @Valid @RequestBody RecomendacionRequest request) {
+
+        Recomendacion recomendacion = new Recomendacion();
+        recomendacion.setIdUsuario(request.getIdUsuario());
+        recomendacion.setIdLibro(request.getIdLibro());
+        recomendacion.setMotivo(request.getMotivo());
+
         return recomendacionService.guardar(recomendacion);
     }
 
     @PutMapping("/{id}")
     public Recomendacion actualizar(
             @PathVariable Long id,
-            @RequestBody Recomendacion recomendacion) {
+            @Valid @RequestBody RecomendacionRequest request) {
+
+        Recomendacion recomendacion = new Recomendacion();
+        recomendacion.setIdUsuario(request.getIdUsuario());
+        recomendacion.setIdLibro(request.getIdLibro());
+        recomendacion.setMotivo(request.getMotivo());
+
         return recomendacionService.actualizar(id, recomendacion);
     }
 

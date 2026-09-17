@@ -1,7 +1,9 @@
 package com.biblioteca.controller;
 
+import com.biblioteca.dto.PrestamoRequest;
 import com.biblioteca.model.Prestamo;
 import com.biblioteca.service.PrestamoService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,13 +32,33 @@ public class PrestamoController {
     }
 
     @PostMapping
-    public Prestamo guardar(@RequestBody Prestamo prestamo) {
+    public Prestamo guardar(
+            @Valid @RequestBody PrestamoRequest request) {
+
+        Prestamo prestamo = new Prestamo();
+
+        prestamo.setIdUsuario(request.getIdUsuario());
+        prestamo.setIdLibro(request.getIdLibro());
+        prestamo.setFechaPrestamo(request.getFechaPrestamo());
+        prestamo.setFechaDevolucion(request.getFechaDevolucion());
+        prestamo.setEstado(request.getEstado());
+
         return prestamoService.guardar(prestamo);
     }
 
     @PutMapping("/{id}")
-    public Prestamo actualizar(@PathVariable Long id,
-                               @RequestBody Prestamo prestamo) {
+    public Prestamo actualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody PrestamoRequest request) {
+
+        Prestamo prestamo = new Prestamo();
+
+        prestamo.setIdUsuario(request.getIdUsuario());
+        prestamo.setIdLibro(request.getIdLibro());
+        prestamo.setFechaPrestamo(request.getFechaPrestamo());
+        prestamo.setFechaDevolucion(request.getFechaDevolucion());
+        prestamo.setEstado(request.getEstado());
+
         return prestamoService.actualizar(id, prestamo);
     }
 
