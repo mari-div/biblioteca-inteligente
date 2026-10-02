@@ -8,7 +8,7 @@ import LibroDetailModal from "./LibroDetailModal.jsx";
 import { genreColor } from "../../utils/format.js";
 import { today, iso, addDays } from "../../utils/dates.js";
 
-export default function Catalogo({ store, viewer, onManage, pushToast }) {
+export default function Catalogo({ store, viewer, canManage, onManage, pushToast }) {
   const { libros, autores, generos, prestamos, reservas, calificaciones } = store;
   const [q, setQ] = useState("");
   const [genFilter, setGenFilter] = useState("todos");
@@ -66,12 +66,14 @@ export default function Catalogo({ store, viewer, onManage, pushToast }) {
             <option value="prest">Prestados</option>
           </select>
         </div>
-        <div className="toolbar">
-          <button className="btn" onClick={onManage}>Autores y géneros</button>
-          <button className="btn btn-primary" onClick={() => setEditing("new")}>
-            <Icon name="plus" size={15} /> Nuevo libro
-          </button>
-        </div>
+        {canManage && (
+          <div className="toolbar">
+            <button className="btn" onClick={onManage}>Autores y géneros</button>
+            <button className="btn btn-primary" onClick={() => setEditing("new")}>
+              <Icon name="plus" size={15} /> Nuevo libro
+            </button>
+          </div>
+        )}
       </div>
 
       {filtered.length ? (
@@ -109,12 +111,16 @@ export default function Catalogo({ store, viewer, onManage, pushToast }) {
                   ) : (
                     <button className="btn btn-sm" onClick={() => quickReservar(l)}>Reservar</button>
                   )}
-                  <button className="icon-btn" title="Editar" onClick={() => setEditing(l)}>
-                    <Icon name="edit" size={14} />
-                  </button>
-                  <button className="icon-btn" title="Eliminar" onClick={() => setConfirmDelete(l)}>
-                    <Icon name="trash" size={14} />
-                  </button>
+                  {canManage && (
+                    <>
+                      <button className="icon-btn" title="Editar" onClick={() => setEditing(l)}>
+                        <Icon name="edit" size={14} />
+                      </button>
+                      <button className="icon-btn" title="Eliminar" onClick={() => setConfirmDelete(l)}>
+                        <Icon name="trash" size={14} />
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             );

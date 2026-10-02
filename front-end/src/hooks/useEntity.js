@@ -12,11 +12,27 @@ import { readLocal, writeLocal } from "../utils/storage.js";
  * @param {"demo"|"live"} mode
  * @param {string} baseUrl    ej. "/api"
  * @param {(type:string, msg:string)=>void} pushToast
+ * @param {string|null} token  token JWT de la sesión actual (solo aplica en modo "live")
+ * @param {()=>void} onUnauthorized  se llama si el backend responde 401 (sesión vencida/ inválida)
  */
-export function useEntity(name, idField, seed, mode, baseUrl, pushToast) {
+export function useEntity(name, idField, seed, mode, baseUrl, pushToast, token, onUnauthorized) {
   const storageKey = "bi_demo_" + name;
   const [items, setItems] = useState(() => readLocal(storageKey, seed));
   const [loading, setLoading] = useState(false);
+
+  const authHeaders = useCallback(
+    (extra) => ({ ...(extra || {}), ...(token ? { Authorization: `Bearer ${token}` } : {}) }),
+    [token]
+  );
+
+  const handleHttpError = useCallback(
+    (res) => {
+      if (res.status === 401 && onUnauthorized) onUnauthorized();
+      if (res.status === 403) throw new Error("no tienes permiso para hacer esto con tu rol actual");
+      throw new Error("HTTP " + res.status);
+    },
+    [onUnauthorized]
+  );
 
   useEffect(() => {
     if (mode === "demo") writeLocal(storageKey, items);
@@ -26,8 +42,8 @@ export function useEntity(name, idField, seed, mode, baseUrl, pushToast) {
     if (mode !== "live") return;
     setLoading(true);
     try {
-      const res = await fetch(`${baseUrl}/${name}`);
-      if (!res.ok) throw new Error("HTTP " + res.status);
+      const res = await fetch(`${baseUrl}/${name}`, { headers: authHeaders() });
+      if (!res.ok) return handleHttpError(res);
       const data = await res.json();
       setItems(data);
     } catch (err) {
@@ -35,12 +51,12 @@ export function useEntity(name, idField, seed, mode, baseUrl, pushToast) {
     } finally {
       setLoading(false);
     }
-  }, [mode, baseUrl, name, pushToast]);
+  }, [mode, baseUrl, name, pushToast, authHeaders, handleHttpError]);
 
   useEffect(() => {
-    if (mode === "live") refresh();
+    if (mode === "live" && token) refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, baseUrl]);
+  }, [mode, baseUrl, token]);
 
   const create = useCallback(
     async (payload) => {
@@ -56,10 +72,10 @@ export function useEntity(name, idField, seed, mode, baseUrl, pushToast) {
       try {
         const res = await fetch(`${baseUrl}/${name}`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: authHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify(payload),
         });
-        if (!res.ok) throw new Error("HTTP " + res.status);
+        if (!res.ok) return handleHttpError(res);
         const record = await res.json();
         setItems((prev) => [...prev, record]);
         return record;
@@ -68,7 +84,7 @@ export function useEntity(name, idField, seed, mode, baseUrl, pushToast) {
         throw err;
       }
     },
-    [mode, baseUrl, name, idField, pushToast]
+    [mode, baseUrl, name, idField, pushToast, authHeaders, handleHttpError]
   );
 
   const update = useCallback(
@@ -80,10 +96,10 @@ export function useEntity(name, idField, seed, mode, baseUrl, pushToast) {
       try {
         const res = await fetch(`${baseUrl}/${name}/${id}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: authHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify(payload),
         });
-        if (!res.ok) throw new Error("HTTP " + res.status);
+        if (!res.ok) return handleHttpError(res);
         const record = await res.json();
         setItems((prev) => prev.map((i) => (i[idField] === id ? record : i)));
       } catch (err) {
@@ -91,7 +107,7 @@ export function useEntity(name, idField, seed, mode, baseUrl, pushToast) {
         throw err;
       }
     },
-    [mode, baseUrl, name, idField, pushToast]
+    [mode, baseUrl, name, idField, pushToast, authHeaders, handleHttpError]
   );
 
   const remove = useCallback(
@@ -101,15 +117,15 @@ export function useEntity(name, idField, seed, mode, baseUrl, pushToast) {
         return;
       }
       try {
-        const res = await fetch(`${baseUrl}/${name}/${id}`, { method: "DELETE" });
-        if (!res.ok && res.status !== 204) throw new Error("HTTP " + res.status);
+        const res = await fetch(`${baseUrl}/${name}/${id}`, { method: "DELETE", headers: authHeaders() });
+        if (!res.ok && res.status !== 204) return handleHttpError(res);
         setItems((prev) => prev.filter((i) => i[idField] !== id));
       } catch (err) {
         pushToast("error", `No se pudo eliminar el registro (${err.message}).`);
         throw err;
       }
     },
-    [mode, baseUrl, name, idField, pushToast]
+    [mode, baseUrl, name, idField, pushToast, authHeaders, handleHttpError]
   );
 
   return { items, setItems, loading, create, update, remove, refresh };
