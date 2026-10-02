@@ -5,7 +5,7 @@ import EmptyState from "../../components/common/EmptyState.jsx";
 import PrestamoForm from "./PrestamoForm.jsx";
 import { today, iso, fmtDate } from "../../utils/dates.js";
 
-export default function Prestamos({ store, viewer, pushToast }) {
+export default function Prestamos({ store, viewer, canManage, pushToast }) {
   const { prestamos, usuarios, libros } = store;
   const [estadoFilter, setEstadoFilter] = useState("todos");
   const [editing, setEditing] = useState(null);
@@ -45,9 +45,11 @@ export default function Prestamos({ store, viewer, pushToast }) {
           <option value="vencido">Vencidos</option>
           <option value="devuelto">Devueltos</option>
         </select>
-        <button className="btn btn-primary" onClick={() => setEditing("new")}>
-          <Icon name="plus" size={15} /> Nuevo préstamo
-        </button>
+        {canManage && (
+          <button className="btn btn-primary" onClick={() => setEditing("new")}>
+            <Icon name="plus" size={15} /> Nuevo préstamo
+          </button>
+        )}
       </div>
 
       {filtered.length ? (
@@ -66,9 +68,15 @@ export default function Prestamos({ store, viewer, pushToast }) {
                   <td><span className={"stamp " + (p.vencido ? "vencido" : p.estado)}>{p.vencido ? "vencido" : p.estado}</span></td>
                   <td>
                     <div className="row-actions">
-                      {p.estado === "activo" && <button className="btn btn-sm" onClick={() => marcarDevuelto(p)}>Marcar devuelto</button>}
-                      <button className="icon-btn" onClick={() => setEditing(p)}><Icon name="edit" size={14} /></button>
-                      <button className="icon-btn" onClick={() => setConfirmDelete(p)}><Icon name="trash" size={14} /></button>
+                      {canManage ? (
+                        <>
+                          {p.estado === "activo" && <button className="btn btn-sm" onClick={() => marcarDevuelto(p)}>Marcar devuelto</button>}
+                          <button className="icon-btn" onClick={() => setEditing(p)}><Icon name="edit" size={14} /></button>
+                          <button className="icon-btn" onClick={() => setConfirmDelete(p)}><Icon name="trash" size={14} /></button>
+                        </>
+                      ) : (
+                        <span style={{ fontSize: "12px", color: "var(--muted)" }}>—</span>
+                      )}
                     </div>
                   </td>
                 </tr>
