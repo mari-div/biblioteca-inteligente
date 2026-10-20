@@ -1,0 +1,5 @@
+# Copia este archivo como application-local.properties (misma carpeta que pom.xml)
+# y pon tus datos. application-local.properties está en .gitignore: NO se sube.
+DB_PASSWORD=tu_contraseña_de_postgres
+# DB_USERNAME=postgres
+# DB_URL=jdbc:postgresql://localhost:5432/DbBibliotecaInteligente
