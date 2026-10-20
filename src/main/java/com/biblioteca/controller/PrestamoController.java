@@ -4,6 +4,7 @@ import com.biblioteca.dto.PrestamoRequest;
 import com.biblioteca.model.Prestamo;
 import com.biblioteca.service.PrestamoService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,25 +26,14 @@ public class PrestamoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Prestamo> buscarPorId(@PathVariable Long id) {
-        return prestamoService.buscarPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public Prestamo buscarPorId(@PathVariable Long id) {
+        return prestamoService.buscarPorId(id);
     }
 
     @PostMapping
-    public Prestamo guardar(
-            @Valid @RequestBody PrestamoRequest request) {
-
-        Prestamo prestamo = new Prestamo();
-
-        prestamo.setIdUsuario(request.getIdUsuario());
-        prestamo.setIdLibro(request.getIdLibro());
-        prestamo.setFechaPrestamo(request.getFechaPrestamo());
-        prestamo.setFechaDevolucion(request.getFechaDevolucion());
-        prestamo.setEstado(request.getEstado());
-
-        return prestamoService.guardar(prestamo);
+    @ResponseStatus(HttpStatus.CREATED)
+    public Prestamo guardar(@Valid @RequestBody PrestamoRequest request) {
+        return prestamoService.registrar(request);
     }
 
     @PutMapping("/{id}")
@@ -51,15 +41,12 @@ public class PrestamoController {
             @PathVariable Long id,
             @Valid @RequestBody PrestamoRequest request) {
 
-        Prestamo prestamo = new Prestamo();
+        return prestamoService.actualizar(id, request);
+    }
 
-        prestamo.setIdUsuario(request.getIdUsuario());
-        prestamo.setIdLibro(request.getIdLibro());
-        prestamo.setFechaPrestamo(request.getFechaPrestamo());
-        prestamo.setFechaDevolucion(request.getFechaDevolucion());
-        prestamo.setEstado(request.getEstado());
-
-        return prestamoService.actualizar(id, prestamo);
+    @PutMapping("/{id}/devolver")
+    public Prestamo devolver(@PathVariable Long id) {
+        return prestamoService.devolver(id);
     }
 
     @DeleteMapping("/{id}")
