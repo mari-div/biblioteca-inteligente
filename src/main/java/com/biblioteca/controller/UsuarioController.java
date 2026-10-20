@@ -1,9 +1,10 @@
 package com.biblioteca.controller;
 
 import com.biblioteca.dto.UsuarioRequest;
-import com.biblioteca.model.Usuario;
+import com.biblioteca.dto.UsuarioResponse;
 import com.biblioteca.service.UsuarioService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,40 +21,27 @@ public class UsuarioController {
     }
 
     @GetMapping
-    public List<Usuario> listar() {
+    public List<UsuarioResponse> listar() {
         return usuarioService.listar();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> buscarPorId(@PathVariable Long id) {
-        return usuarioService.buscarPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public UsuarioResponse buscarPorId(@PathVariable Long id) {
+        return usuarioService.buscarPorId(id);
     }
 
     @PostMapping
-    public Usuario guardar(@Valid @RequestBody UsuarioRequest request) {
-        Usuario usuario = new Usuario();
-        usuario.setNombre(request.getNombre());
-        usuario.setEmail(request.getEmail());
-        usuario.setPassword(request.getPassword());
-        usuario.setRol(request.getRol());
-
-        return usuarioService.guardar(usuario);
+    @ResponseStatus(HttpStatus.CREATED)
+    public UsuarioResponse guardar(@Valid @RequestBody UsuarioRequest request) {
+        return usuarioService.crear(request);
     }
 
     @PutMapping("/{id}")
-    public Usuario actualizar(
+    public UsuarioResponse actualizar(
             @PathVariable Long id,
             @Valid @RequestBody UsuarioRequest request) {
 
-        Usuario usuario = new Usuario();
-        usuario.setNombre(request.getNombre());
-        usuario.setEmail(request.getEmail());
-        usuario.setPassword(request.getPassword());
-        usuario.setRol(request.getRol());
-
-        return usuarioService.actualizar(id, usuario);
+        return usuarioService.actualizar(id, request);
     }
 
     @DeleteMapping("/{id}")

@@ -1,6 +1,7 @@
 package com.biblioteca.controller;
 
 import com.biblioteca.dto.RecomendacionRequest;
+import com.biblioteca.dto.SugerenciaResponse;
 import com.biblioteca.model.Recomendacion;
 import com.biblioteca.service.RecomendacionService;
 import jakarta.validation.Valid;
@@ -29,6 +30,18 @@ public class RecomendacionController {
         return recomendacionService.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    /** Sugerencias calculadas al momento, sin guardarlas. */
+    @GetMapping("/sugerencias/{idUsuario}")
+    public List<SugerenciaResponse> sugerir(@PathVariable Long idUsuario) {
+        return recomendacionService.sugerir(idUsuario);
+    }
+
+    /** Calcula las sugerencias y guarda como recomendación las que el usuario no tenía. */
+    @PostMapping("/generar/{idUsuario}")
+    public List<Recomendacion> generar(@PathVariable Long idUsuario) {
+        return recomendacionService.generar(idUsuario);
     }
 
     @PostMapping
