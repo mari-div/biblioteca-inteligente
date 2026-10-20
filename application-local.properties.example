@@ -3,3 +3,6 @@
 DB_PASSWORD=tu_contraseña_de_postgres
 # DB_USERNAME=postgres
 # DB_URL=jdbc:postgresql://localhost:5432/DbBibliotecaInteligente
+# Secreto para firmar los JWT, en Base64 y de al menos 32 bytes. Genera uno con:
+#   PowerShell: [Convert]::ToBase64String((1..64 | ForEach-Object { Get-Random -Maximum 256 }))
+JWT_SECRET=pega_aqui_tu_secreto_base64
