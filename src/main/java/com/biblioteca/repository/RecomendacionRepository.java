@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RecomendacionRepository extends JpaRepository<Recomendacion, Long> {
+
+    boolean existsByIdUsuarioAndIdLibro(Long idUsuario, Long idLibro);
 }
