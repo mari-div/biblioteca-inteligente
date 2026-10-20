@@ -2,6 +2,7 @@ package com.biblioteca.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class UsuarioRequest {
@@ -15,11 +16,14 @@ public class UsuarioRequest {
     @Size(max = 150, message = "El email no puede superar los 150 caracteres")
     private String email;
 
-    @NotBlank(message = "La contraseña es obligatoria")
-    @Size(min = 6, max = 255, message = "La contraseña debe tener al menos 6 caracteres")
+    // Obligatoria al crear (lo comprueba UsuarioService). Al editar, si viene vacía se conserva la actual.
+    // Máximo 72: BCrypt ignora lo que pase de 72 bytes.
+    @Size(min = 6, max = 72, message = "La contraseña debe tener entre 6 y 72 caracteres")
     private String password;
 
     @NotBlank(message = "El rol es obligatorio")
+    @Pattern(regexp = "lector|bibliotecario|administrador",
+            message = "El rol debe ser 'lector', 'bibliotecario' o 'administrador'")
     private String rol;
 
     public UsuarioRequest() {
