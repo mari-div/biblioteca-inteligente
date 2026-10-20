@@ -1,6 +1,7 @@
 package com.biblioteca.dto;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 public class ReservaRequest {
 
@@ -11,6 +12,7 @@ public class ReservaRequest {
     private Long idLibro;
 
     @NotNull(message = "El estado es obligatorio")
+    @Pattern(regexp = "pendiente|lista|cancelada", message = "El estado debe ser 'pendiente', 'lista' o 'cancelada'")
     private String estado;
 
     public ReservaRequest() {
@@ -40,3 +42,4 @@ public class ReservaRequest {
         this.estado = estado;
     }
 }
+

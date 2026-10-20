@@ -1,6 +1,7 @@
 package com.biblioteca.dto;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
 
 public class PrestamoRequest {
@@ -14,9 +15,11 @@ public class PrestamoRequest {
     @NotNull(message = "La fecha del préstamo es obligatoria")
     private LocalDate fechaPrestamo;
 
+    // Si no se envía, se calcula como fechaPrestamo + 14 días
     private LocalDate fechaDevolucion;
 
     @NotNull(message = "El estado es obligatorio")
+    @Pattern(regexp = "activo|devuelto", message = "El estado debe ser 'activo' o 'devuelto'")
     private String estado;
 
     public PrestamoRequest() {
