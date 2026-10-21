@@ -4,6 +4,7 @@ import com.biblioteca.dto.ReservaRequest;
 import com.biblioteca.model.Reserva;
 import com.biblioteca.service.ReservaService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,23 +26,14 @@ public class ReservaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Reserva> buscarPorId(@PathVariable Long id) {
-        return reservaService.buscarPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public Reserva buscarPorId(@PathVariable Long id) {
+        return reservaService.buscarPorId(id);
     }
 
     @PostMapping
-    public Reserva guardar(
-            @Valid @RequestBody ReservaRequest request) {
-
-        Reserva reserva = new Reserva();
-
-        reserva.setIdUsuario(request.getIdUsuario());
-        reserva.setIdLibro(request.getIdLibro());
-        reserva.setEstado(request.getEstado());
-
-        return reservaService.guardar(reserva);
+    @ResponseStatus(HttpStatus.CREATED)
+    public Reserva guardar(@Valid @RequestBody ReservaRequest request) {
+        return reservaService.registrar(request);
     }
 
     @PutMapping("/{id}")
@@ -49,13 +41,7 @@ public class ReservaController {
             @PathVariable Long id,
             @Valid @RequestBody ReservaRequest request) {
 
-        Reserva reserva = new Reserva();
-
-        reserva.setIdUsuario(request.getIdUsuario());
-        reserva.setIdLibro(request.getIdLibro());
-        reserva.setEstado(request.getEstado());
-
-        return reservaService.actualizar(id, reserva);
+        return reservaService.actualizar(id, request);
     }
 
     @DeleteMapping("/{id}")
