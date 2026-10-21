@@ -2,6 +2,7 @@ package com.biblioteca.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class LibroRequest {
@@ -20,6 +21,10 @@ public class LibroRequest {
     private Long idGenero;
 
     private String descripcion;
+
+    @Size(max = 500, message = "La URL de la portada no puede superar los 500 caracteres")
+    @Pattern(regexp = "^$|^https?://\\S+$", message = "La portada debe ser una URL que empiece por http:// o https://")
+    private String portadaUrl;
 
     private Boolean disponible = true;
 
@@ -56,6 +61,14 @@ public class LibroRequest {
 
     public void setIdGenero(Long idGenero) {
         this.idGenero = idGenero;
+    }
+
+    public String getPortadaUrl() {
+        return portadaUrl;
+    }
+
+    public void setPortadaUrl(String portadaUrl) {
+        this.portadaUrl = portadaUrl;
     }
 
     public String getDescripcion() {

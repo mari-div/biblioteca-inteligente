@@ -10,7 +10,7 @@ const COLS = [
   { id: "cancelada", label: "Canceladas" },
 ];
 
-export default function Reservas({ store, viewer, pushToast }) {
+export default function Reservas({ store, viewer, canManage, pushToast }) {
   const { reservas, usuarios, libros } = store;
   const [creating, setCreating] = useState(false);
 
@@ -24,9 +24,11 @@ export default function Reservas({ store, viewer, pushToast }) {
     <>
       <div className="section-head">
         <div />
-        <button className="btn btn-primary" onClick={() => setCreating(true)}>
-          <Icon name="plus" size={15} /> Nueva reserva
-        </button>
+        {canManage && (
+          <button className="btn btn-primary" onClick={() => setCreating(true)}>
+            <Icon name="plus" size={15} /> Nueva reserva
+          </button>
+        )}
       </div>
 
       <div className="board">
@@ -40,20 +42,22 @@ export default function Reservas({ store, viewer, pushToast }) {
                   <div key={r.idReserva} className="res-card">
                     <div className="titulo">{bookTitle(r.idLibro)}</div>
                     <div className="meta">{userName(r.idUsuario)} · {fmtDate(r.fechaReserva)}</div>
-                    <div className="actions">
-                      {col.id === "pendiente" && (
-                        <>
-                          <button className="btn btn-sm" onClick={() => move(r, "lista")}>Marcar lista</button>
-                          <button className="btn btn-sm btn-danger" onClick={() => move(r, "cancelada")}>Cancelar</button>
-                        </>
-                      )}
-                      {col.id === "lista" && (
-                        <button className="btn btn-sm" onClick={() => reservas.remove(r.idReserva)}>Entregada · cerrar</button>
-                      )}
-                      {col.id === "cancelada" && (
-                        <button className="btn btn-sm" onClick={() => move(r, "pendiente")}>Reactivar</button>
-                      )}
-                    </div>
+                    {canManage && (
+                      <div className="actions">
+                        {col.id === "pendiente" && (
+                          <>
+                            <button className="btn btn-sm" onClick={() => move(r, "lista")}>Marcar lista</button>
+                            <button className="btn btn-sm btn-danger" onClick={() => move(r, "cancelada")}>Cancelar</button>
+                          </>
+                        )}
+                        {col.id === "lista" && (
+                          <button className="btn btn-sm" onClick={() => reservas.remove(r.idReserva)}>Entregada · cerrar</button>
+                        )}
+                        {col.id === "cancelada" && (
+                          <button className="btn btn-sm" onClick={() => move(r, "pendiente")}>Reactivar</button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))
               ) : (

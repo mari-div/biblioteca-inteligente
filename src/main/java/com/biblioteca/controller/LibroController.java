@@ -40,6 +40,7 @@ public class LibroController {
         libro.setIsbn(request.getIsbn());
         libro.setIdGenero(request.getIdGenero());
         libro.setDescripcion(request.getDescripcion());
+        libro.setPortadaUrl(request.getPortadaUrl() == null || request.getPortadaUrl().isBlank() ? null : request.getPortadaUrl().trim());
         libro.setDisponible(request.getDisponible());
 
         return libroService.guardar(libro);
@@ -57,6 +58,7 @@ public class LibroController {
         libro.setIsbn(request.getIsbn());
         libro.setIdGenero(request.getIdGenero());
         libro.setDescripcion(request.getDescripcion());
+        libro.setPortadaUrl(request.getPortadaUrl() == null || request.getPortadaUrl().isBlank() ? null : request.getPortadaUrl().trim());
         libro.setDisponible(request.getDisponible());
 
         return libroService.actualizar(id, libro);

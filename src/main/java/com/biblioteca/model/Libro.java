@@ -25,6 +25,9 @@ public class Libro {
 
     private Boolean disponible = true;
 
+    @Column(length = 500)
+    private String portadaUrl;
+
     public Libro() {
     }
 
@@ -74,6 +77,14 @@ public class Libro {
 
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
+    }
+
+    public String getPortadaUrl() {
+        return portadaUrl;
+    }
+
+    public void setPortadaUrl(String portadaUrl) {
+        this.portadaUrl = portadaUrl;
     }
 
     public Boolean getDisponible() {

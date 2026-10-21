@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Modal from "../../components/common/Modal.jsx";
 import StarRow from "../../components/common/StarRow.jsx";
+import BookCover from "../../components/common/BookCover.jsx";
 import { genreColor } from "../../utils/format.js";
 import { today, iso } from "../../utils/dates.js";
 
@@ -22,6 +23,9 @@ export default function LibroDetailModal({ libro, store, viewer, onClose, pushTo
 
   return (
     <Modal title={libro.titulo} onClose={onClose} wide>
+      <div className="book-detail-head">
+        <BookCover libro={libro} autor={autor?.nombre} size="L" className="book-cover-lg" />
+        <div>
       <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "10px" }}>
         <span className="genre-badge" style={{ background: genreColor(libro.idGenero) + "22", color: genreColor(libro.idGenero) }}>
           <span className="genre-dot" style={{ background: genreColor(libro.idGenero) }} />
@@ -33,6 +37,8 @@ export default function LibroDetailModal({ libro, store, viewer, onClose, pushTo
         de <strong style={{ color: "var(--text)", fontWeight: 600 }}>{autor?.nombre || "Autor desconocido"}</strong>
       </p>
       <p style={{ fontSize: "13.6px", marginTop: "8px" }}>{libro.descripcion || "Sin descripción disponible."}</p>
+        </div>
+      </div>
 
       <div style={{ margin: "16px 0", borderTop: "1px solid var(--line)", paddingTop: "14px" }}>
         <h4 style={{ fontSize: "14px", marginBottom: "10px" }}>Calificaciones de lectores ({rel.length})</h4>
