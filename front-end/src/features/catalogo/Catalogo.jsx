@@ -2,6 +2,7 @@ import { useState } from "react";
 import Modal from "../../components/common/Modal.jsx";
 import Icon from "../../components/Icon.jsx";
 import EmptyState from "../../components/common/EmptyState.jsx";
+import BookCover from "../../components/common/BookCover.jsx";
 import AvgStars from "../../components/common/AvgStars.jsx";
 import LibroForm from "./LibroForm.jsx";
 import LibroDetailModal from "./LibroDetailModal.jsx";
@@ -83,6 +84,7 @@ export default function Catalogo({ store, viewer, canManage, onManage, pushToast
             const genero = generos.items.find((g) => g.idGenero === l.idGenero);
             return (
               <div key={l.idLibro} className="card book-card">
+                <BookCover libro={l} />
                 <div className="book-top">
                   <div>
                     <div className="book-title">{l.titulo}</div>
