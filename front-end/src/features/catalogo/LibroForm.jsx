@@ -1,9 +1,10 @@
 import { useState } from "react";
 import Field from "../../components/common/Field.jsx";
+import BookCover from "../../components/common/BookCover.jsx";
 
 export default function LibroForm({ initial, autores, generos, onSubmit, onCancel }) {
   const [form, setForm] = useState(
-    initial || { titulo: "", isbn: "", idAutor: autores[0]?.idAutor || "", idGenero: generos[0]?.idGenero || "", descripcion: "", disponible: true }
+    initial || { titulo: "", isbn: "", idAutor: autores[0]?.idAutor || "", idGenero: generos[0]?.idGenero || "", descripcion: "", portadaUrl: "", disponible: true }
   );
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -42,9 +43,20 @@ export default function LibroForm({ initial, autores, generos, onSubmit, onCance
       <Field label="Descripción">
         <textarea value={form.descripcion} onChange={(ev) => set("descripcion", ev.target.value)} placeholder="Sinopsis breve" />
       </Field>
+      <Field label="URL de la portada (opcional)">
+        <input
+          value={form.portadaUrl || ""}
+          onChange={(ev) => set("portadaUrl", ev.target.value)}
+          placeholder="https://... (si la dejas vacía se busca por ISBN)"
+        />
+      </Field>
+      <div className="cover-preview">
+        <BookCover key={(form.portadaUrl || "") + form.isbn} libro={form} size="L" className="book-cover-lg" />
+        <span>Así se verá la portada del libro.</span>
+      </div>
       <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "6px" }}>
         <button className="btn" onClick={onCancel}>Cancelar</button>
-        <button className="btn btn-primary" onClick={() => onSubmit(form)} disabled={!form.titulo}>Guardar libro</button>
+        <button className="btn btn-primary" onClick={() => onSubmit({ ...form, portadaUrl: (form.portadaUrl || "").trim() })} disabled={!form.titulo}>Guardar libro</button>
       </div>
     </>
   );
