@@ -84,7 +84,7 @@ export default function Catalogo({ store, viewer, canManage, onManage, pushToast
             const genero = generos.items.find((g) => g.idGenero === l.idGenero);
             return (
               <div key={l.idLibro} className="card book-card">
-                <BookCover libro={l} />
+                <BookCover libro={l} autor={autor?.nombre} />
                 <div className="book-top">
                   <div>
                     <div className="book-title">{l.titulo}</div>

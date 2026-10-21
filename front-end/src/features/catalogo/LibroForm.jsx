@@ -51,7 +51,7 @@ export default function LibroForm({ initial, autores, generos, onSubmit, onCance
         />
       </Field>
       <div className="cover-preview">
-        <BookCover key={(form.portadaUrl || "") + form.isbn} libro={form} size="L" className="book-cover-lg" />
+        <BookCover key={(form.portadaUrl || "") + form.isbn} libro={form} autor={autores.find((a) => a.idAutor === form.idAutor)?.nombre} size="L" className="book-cover-lg" />
         <span>Así se verá la portada del libro.</span>
       </div>
       <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "6px" }}>

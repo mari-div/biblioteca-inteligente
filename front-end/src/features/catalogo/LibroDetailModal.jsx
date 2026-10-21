@@ -24,7 +24,7 @@ export default function LibroDetailModal({ libro, store, viewer, onClose, pushTo
   return (
     <Modal title={libro.titulo} onClose={onClose} wide>
       <div className="book-detail-head">
-        <BookCover libro={libro} size="L" className="book-cover-lg" />
+        <BookCover libro={libro} autor={autor?.nombre} size="L" className="book-cover-lg" />
         <div>
       <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "10px" }}>
         <span className="genre-badge" style={{ background: genreColor(libro.idGenero) + "22", color: genreColor(libro.idGenero) }}>
