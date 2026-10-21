@@ -3,7 +3,9 @@ package com.biblioteca.controller;
 import com.biblioteca.dto.PrestamoRequest;
 import com.biblioteca.model.Prestamo;
 import com.biblioteca.service.PrestamoService;
+import com.biblioteca.security.UsuarioActual;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,9 +17,11 @@ import java.util.List;
 public class PrestamoController {
 
     private final PrestamoService prestamoService;
+    private final UsuarioActual usuarioActual;
 
-    public PrestamoController(PrestamoService prestamoService) {
+    public PrestamoController(PrestamoService prestamoService, UsuarioActual usuarioActual) {
         this.prestamoService = prestamoService;
+        this.usuarioActual = usuarioActual;
     }
 
     @GetMapping
@@ -32,7 +36,8 @@ public class PrestamoController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Prestamo guardar(@Valid @RequestBody PrestamoRequest request) {
+    public Prestamo guardar(@Valid @RequestBody PrestamoRequest request, Authentication authentication) {
+        usuarioActual.exigirPropio(authentication, request.getIdUsuario());
         return prestamoService.registrar(request);
     }
 

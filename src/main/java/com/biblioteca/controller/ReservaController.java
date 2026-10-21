@@ -3,7 +3,9 @@ package com.biblioteca.controller;
 import com.biblioteca.dto.ReservaRequest;
 import com.biblioteca.model.Reserva;
 import com.biblioteca.service.ReservaService;
+import com.biblioteca.security.UsuarioActual;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,9 +17,11 @@ import java.util.List;
 public class ReservaController {
 
     private final ReservaService reservaService;
+    private final UsuarioActual usuarioActual;
 
-    public ReservaController(ReservaService reservaService) {
+    public ReservaController(ReservaService reservaService, UsuarioActual usuarioActual) {
         this.reservaService = reservaService;
+        this.usuarioActual = usuarioActual;
     }
 
     @GetMapping
@@ -32,7 +36,8 @@ public class ReservaController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Reserva guardar(@Valid @RequestBody ReservaRequest request) {
+    public Reserva guardar(@Valid @RequestBody ReservaRequest request, Authentication authentication) {
+        usuarioActual.exigirPropio(authentication, request.getIdUsuario());
         return reservaService.registrar(request);
     }
 
