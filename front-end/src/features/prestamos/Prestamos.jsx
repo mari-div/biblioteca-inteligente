@@ -5,7 +5,7 @@ import EmptyState from "../../components/common/EmptyState.jsx";
 import PrestamoForm from "./PrestamoForm.jsx";
 import { today, iso, addDays, fmtDate } from "../../utils/dates.js";
 
-export default function Prestamos({ store, viewer, canManage, pushToast }) {
+export default function Prestamos({ store, canManage, pushToast }) {
   const { prestamos, usuarios, libros, notificaciones } = store;
   const pendientes = prestamos.items.filter((p) => p.estado === "solicitado").length;
   // El bibliotecario entra directo a las solicitudes por revisar, si las hay.
@@ -123,9 +123,9 @@ export default function Prestamos({ store, viewer, canManage, pushToast }) {
         <Modal title={editing === "new" ? "Nuevo préstamo" : "Editar préstamo"} onClose={() => setEditing(null)}>
           <PrestamoForm
             initial={editing === "new" ? null : editing}
-            usuarios={usuarios.items}
-            libros={libros.items}
-            defaultUsuario={viewer?.idUsuario}
+            nuevo={editing === "new"}
+            usuarios={editing === "new" ? usuarios.items.filter((u) => u.rol === "lector") : usuarios.items}
+            libros={editing === "new" ? libros.items.filter((l) => l.disponible) : libros.items}
             onSubmit={save}
             onCancel={() => setEditing(null)}
           />

@@ -6,17 +6,20 @@ import BookCover from "../../components/common/BookCover.jsx";
 import AvgStars from "../../components/common/AvgStars.jsx";
 import LibroForm from "./LibroForm.jsx";
 import LibroDetailModal from "./LibroDetailModal.jsx";
+import PrestamoForm from "../prestamos/PrestamoForm.jsx";
 import { genreColor } from "../../utils/format.js";
 import { today, iso, addDays } from "../../utils/dates.js";
 
 export default function Catalogo({ store, viewer, mode, canManage, onManage, pushToast }) {
-  const { libros, autores, generos, prestamos, reservas, calificaciones } = store;
+  const { libros, autores, generos, prestamos, reservas, calificaciones, usuarios } = store;
   const [q, setQ] = useState("");
   const [genFilter, setGenFilter] = useState("todos");
   const [availFilter, setAvailFilter] = useState("todos");
   const [editing, setEditing] = useState(null); // libro | "new" | null
   const [detail, setDetail] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [prestando, setPrestando] = useState(null); // libro que el personal presta a un lector
+  const lectores = usuarios.items.filter((u) => u.rol === "lector");
 
   const filtered = libros.items.filter((l) => {
     if (genFilter !== "todos" && l.idGenero !== Number(genFilter)) return false;
@@ -48,14 +51,17 @@ export default function Catalogo({ store, viewer, mode, canManage, onManage, pus
     } catch { /* ya notificado */ }
   };
 
-  const quickPrestar = async (libro) => {
-    if (!viewer) return;
+  // Préstamo en mostrador: el personal elige a qué lector se lo entrega.
+  const prestarALector = async (form) => {
+    const libro = prestando;
     try {
-      await prestamos.create({ idUsuario: viewer.idUsuario, idLibro: libro.idLibro, fechaPrestamo: iso(today), fechaDevolucion: iso(addDays(today, 14)), estado: "activo" });
+      await prestamos.create({ ...form, estado: "activo" });
       // En modo live el backend ya marca el libro como no disponible; solo se vuelve a leer.
       if (mode === "demo") await libros.update(libro.idLibro, { ...libro, disponible: false });
       else await libros.refresh();
-      pushToast("success", `Préstamo registrado para ${viewer.nombre}.`);
+      const lector = usuarios.items.find((u) => u.idUsuario === form.idUsuario);
+      pushToast("success", `Préstamo de "${libro.titulo}" registrado para ${lector?.nombre || "el lector"}.`);
+      setPrestando(null);
     } catch { /* ya notificado */ }
   };
   const quickReservar = async (libro) => {
@@ -128,7 +134,7 @@ export default function Catalogo({ store, viewer, mode, canManage, onManage, pus
                 <div className="book-actions">
                   <button className="btn btn-sm" onClick={() => setDetail(l)}>Ver ficha</button>
                   {l.disponible && canManage ? (
-                    <button className="btn btn-sm btn-primary" onClick={() => quickPrestar(l)}>Prestar</button>
+                    <button className="btn btn-sm btn-primary" onClick={() => setPrestando(l)}>Prestar</button>
                   ) : l.disponible && yaSolicitado(l) ? (
                     <button className="btn btn-sm" disabled>Solicitado</button>
                   ) : l.disponible ? (
@@ -165,6 +171,20 @@ export default function Catalogo({ store, viewer, mode, canManage, onManage, pus
             generos={generos.items}
             onSubmit={saveLibro}
             onCancel={() => setEditing(null)}
+          />
+        </Modal>
+      )}
+
+      {prestando && (
+        <Modal title={`Prestar "${prestando.titulo}"`} onClose={() => setPrestando(null)}>
+          <PrestamoForm
+            key={prestando.idLibro}
+            nuevo
+            initial={{ idUsuario: lectores[0]?.idUsuario, idLibro: prestando.idLibro, fechaPrestamo: iso(today), fechaDevolucion: iso(addDays(today, 14)), estado: "activo" }}
+            usuarios={lectores}
+            libros={[prestando]}
+            onSubmit={prestarALector}
+            onCancel={() => setPrestando(null)}
           />
         </Modal>
       )}
