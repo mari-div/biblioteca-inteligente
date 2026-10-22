@@ -18,7 +18,7 @@ jobs:
           java-version: '21'
           cache: maven
       - name: Tests y compilación
-        run: ./mvnw -B verify
+        run: mvn -B verify
 
   frontend:
     name: Frontend (Vite)
