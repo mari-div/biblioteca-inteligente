@@ -5,7 +5,7 @@ import { today, iso, fmtRelative } from "../../utils/dates.js";
 
 const TIPO_COLOR = { prestamo: "dusty", reserva: "sage", recordatorio: "rust", sistema: "plum" };
 
-export default function Notificaciones({ store, viewer, pushToast }) {
+export default function Notificaciones({ store, viewer, canSend, pushToast }) {
   const { notificaciones } = store;
   const [mensaje, setMensaje] = useState("");
   const [tipo, setTipo] = useState("sistema");
@@ -53,7 +53,7 @@ export default function Notificaciones({ store, viewer, pushToast }) {
         )}
       </div>
 
-      <div className="card" style={{ padding: "16px 18px" }}>
+      {canSend && <div className="card" style={{ padding: "16px 18px" }}>
         <h4 style={{ fontSize: "13.5px", marginBottom: "10px" }}>Enviar notificación de prueba a {viewer?.nombre || "—"}</h4>
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
           <input
@@ -67,7 +67,7 @@ export default function Notificaciones({ store, viewer, pushToast }) {
           </select>
           <button className="btn btn-primary" onClick={enviar}>Enviar</button>
         </div>
-      </div>
+      </div>}
     </>
   );
 }

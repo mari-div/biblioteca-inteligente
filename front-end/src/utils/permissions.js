@@ -17,5 +17,7 @@ export const permissions = {
   gestionarUsuarios: (rol) => isAdmin(rol),                // ver y administrar la sección de usuarios
   gestionarPrestamos: (rol) => isBibliotecarioOAdmin(rol), // editar, marcar devuelto, eliminar, crear a nombre de otro
   gestionarReservas: (rol) => isBibliotecarioOAdmin(rol),  // mover de estado, eliminar, crear a nombre de otro
+  verTodosLosRegistros: (rol) => isBibliotecarioOAdmin(rol), // ver préstamos, reservas y notificaciones de todos los usuarios
+  enviarNotificaciones: (rol) => isBibliotecarioOAdmin(rol), // crear avisos manuales
   moderarCalificaciones: (rol) => isBibliotecarioOAdmin(rol), // eliminar calificaciones ajenas
 };

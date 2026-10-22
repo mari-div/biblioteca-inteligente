@@ -9,7 +9,7 @@ import LibroDetailModal from "./LibroDetailModal.jsx";
 import { genreColor } from "../../utils/format.js";
 import { today, iso, addDays } from "../../utils/dates.js";
 
-export default function Catalogo({ store, viewer, canManage, onManage, pushToast }) {
+export default function Catalogo({ store, viewer, mode, canManage, onManage, pushToast }) {
   const { libros, autores, generos, prestamos, reservas, calificaciones } = store;
   const [q, setQ] = useState("");
   const [genFilter, setGenFilter] = useState("todos");
@@ -35,16 +35,23 @@ export default function Catalogo({ store, viewer, canManage, onManage, pushToast
     setEditing(null);
   };
 
+  // El hook ya avisa del error (por ejemplo, una regla de negocio), así que aquí solo se evita seguir.
   const quickPrestar = async (libro) => {
     if (!viewer) return;
-    await prestamos.create({ idUsuario: viewer.idUsuario, idLibro: libro.idLibro, fechaPrestamo: iso(today), fechaDevolucion: iso(addDays(today, 14)), estado: "activo" });
-    await libros.update(libro.idLibro, { ...libro, disponible: false });
-    pushToast("success", `Préstamo registrado para ${viewer.nombre}.`);
+    try {
+      await prestamos.create({ idUsuario: viewer.idUsuario, idLibro: libro.idLibro, fechaPrestamo: iso(today), fechaDevolucion: iso(addDays(today, 14)), estado: "activo" });
+      // En modo live el backend ya marca el libro como no disponible; solo se vuelve a leer.
+      if (mode === "demo") await libros.update(libro.idLibro, { ...libro, disponible: false });
+      else await libros.refresh();
+      pushToast("success", canManage ? `Préstamo registrado para ${viewer.nombre}.` : "Préstamo registrado. ¡Disfruta tu lectura!");
+    } catch { /* ya notificado */ }
   };
   const quickReservar = async (libro) => {
     if (!viewer) return;
-    await reservas.create({ idUsuario: viewer.idUsuario, idLibro: libro.idLibro, estado: "pendiente" });
-    pushToast("success", `Reserva registrada para ${viewer.nombre}.`);
+    try {
+      await reservas.create({ idUsuario: viewer.idUsuario, idLibro: libro.idLibro, estado: "pendiente" });
+      pushToast("success", canManage ? `Reserva registrada para ${viewer.nombre}.` : "Reserva registrada. Te avisaremos cuando el libro esté listo.");
+    } catch { /* ya notificado */ }
   };
 
   return (
@@ -109,7 +116,7 @@ export default function Catalogo({ store, viewer, canManage, onManage, pushToast
                 <div className="book-actions">
                   <button className="btn btn-sm" onClick={() => setDetail(l)}>Ver ficha</button>
                   {l.disponible ? (
-                    <button className="btn btn-sm btn-primary" onClick={() => quickPrestar(l)}>Prestar</button>
+                    <button className="btn btn-sm btn-primary" onClick={() => quickPrestar(l)}>{canManage ? "Prestar" : "Pedir prestado"}</button>
                   ) : (
                     <button className="btn btn-sm" onClick={() => quickReservar(l)}>Reservar</button>
                   )}

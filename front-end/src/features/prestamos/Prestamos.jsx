@@ -56,36 +56,37 @@ export default function Prestamos({ store, viewer, canManage, pushToast }) {
         <div className="table-wrap">
           <table>
             <thead>
-              <tr><th>Libro</th><th>Usuario</th><th>Prestado</th><th>Devolución</th><th>Estado</th><th></th></tr>
+              <tr>
+                <th>Libro</th>
+                {canManage && <th>Usuario</th>}
+                <th>Prestado</th><th>Devolución</th><th>Estado</th>
+                {canManage && <th></th>}
+              </tr>
             </thead>
             <tbody>
               {filtered.map((p) => (
                 <tr key={p.idPrestamo}>
                   <td>{bookTitle(p.idLibro)}</td>
-                  <td>{userName(p.idUsuario)}</td>
+                  {canManage && <td>{userName(p.idUsuario)}</td>}
                   <td>{fmtDate(p.fechaPrestamo)}</td>
                   <td>{fmtDate(p.fechaDevolucion)}</td>
                   <td><span className={"stamp " + (p.vencido ? "vencido" : p.estado)}>{p.vencido ? "vencido" : p.estado}</span></td>
-                  <td>
-                    <div className="row-actions">
-                      {canManage ? (
-                        <>
-                          {p.estado === "activo" && <button className="btn btn-sm" onClick={() => marcarDevuelto(p)}>Marcar devuelto</button>}
-                          <button className="icon-btn" onClick={() => setEditing(p)}><Icon name="edit" size={14} /></button>
-                          <button className="icon-btn" onClick={() => setConfirmDelete(p)}><Icon name="trash" size={14} /></button>
-                        </>
-                      ) : (
-                        <span style={{ fontSize: "12px", color: "var(--muted)" }}>—</span>
-                      )}
-                    </div>
-                  </td>
+                  {canManage && (
+                    <td>
+                      <div className="row-actions">
+                        {p.estado === "activo" && <button className="btn btn-sm" onClick={() => marcarDevuelto(p)}>Marcar devuelto</button>}
+                        <button className="icon-btn" onClick={() => setEditing(p)}><Icon name="edit" size={14} /></button>
+                        <button className="icon-btn" onClick={() => setConfirmDelete(p)}><Icon name="trash" size={14} /></button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       ) : (
-        <div className="card"><EmptyState title="No hay préstamos en este estado" sub="Registra uno nuevo con el botón de arriba." /></div>
+        <div className="card"><EmptyState title="No hay préstamos en este estado" sub={canManage ? "Registra uno nuevo con el botón de arriba." : "Pide prestado un libro desde el Catálogo."} /></div>
       )}
 
       {editing && (

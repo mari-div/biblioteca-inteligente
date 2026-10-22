@@ -48,7 +48,7 @@ export default function LibroDetailModal({ libro, store, viewer, onClose, pushTo
             return (
               <div key={c.idCalificacion} style={{ padding: "9px 0", borderBottom: "1px solid var(--line-soft)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontWeight: 600, fontSize: "13px" }}>{u?.nombre || "Usuario"}</span>
+                  <span style={{ fontWeight: 600, fontSize: "13px" }}>{c.idUsuario === viewer?.idUsuario ? "Tú" : u?.nombre || "Lector"}</span>
                   <StarRow value={c.puntuacion} onChange={() => {}} size={14} readOnly />
                 </div>
                 {c.comentario ? <p style={{ fontSize: "12.6px", color: "var(--muted)", marginTop: "3px" }}>{c.comentario}</p> : null}
