@@ -10,12 +10,13 @@ export default function Dashboard({ store, viewer }) {
   const disponibles = libros.items.filter((l) => l.disponible).length;
   const activos = prestamos.items.filter((p) => p.estado === "activo").length;
   const vencidos = prestamos.items.filter((p) => p.estado === "activo" && p.fechaDevolucion < iso(today)).length;
+  const solicitudes = prestamos.items.filter((p) => p.estado === "solicitado").length;
   const pendientesReserva = reservas.items.filter((r) => r.estado === "pendiente").length;
 
   const byGenre = generos.items.map((g) => ({ ...g, count: libros.items.filter((l) => l.idGenero === g.idGenero).length }));
   const maxCount = Math.max(1, ...byGenre.map((g) => g.count));
 
-  const recentLoans = [...prestamos.items].sort((a, b) => (a.fechaPrestamo < b.fechaPrestamo ? 1 : -1)).slice(0, 5);
+  const recentLoans = prestamos.items.filter((p) => p.estado === "activo" || p.estado === "devuelto").sort((a, b) => (a.fechaPrestamo < b.fechaPrestamo ? 1 : -1)).slice(0, 5);
   const dueSoon = prestamos.items
     .filter((p) => p.estado === "activo")
     .sort((a, b) => (a.fechaDevolucion > b.fechaDevolucion ? 1 : -1))
@@ -36,7 +37,7 @@ export default function Dashboard({ store, viewer }) {
           <div className="stat-label">{esPersonal ? "Préstamos activos" : "Mis préstamos activos"}</div>
           <div className="stat-num">{activos}</div>
           <div className="stat-sub" style={vencidos ? { color: "var(--rust)" } : undefined}>
-            {vencidos ? `${vencidos} vencidos` : "Al día"}
+            {[vencidos ? `${vencidos} vencidos` : "Al día", solicitudes ? `${solicitudes} ${esPersonal ? "por aprobar" : "en espera"}` : null].filter(Boolean).join(" · ")}
           </div>
         </div>
         <div className="card stat-card">

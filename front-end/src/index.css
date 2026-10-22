@@ -194,6 +194,8 @@
   }
   .stamp.activo{color:var(--sage); border-color:var(--sage);}
   .stamp.devuelto{color:var(--muted); border-color:var(--line);}
+  .stamp.solicitado{color:var(--dusty); border-color:var(--dusty);}
+  .stamp.rechazado{color:var(--muted); border-color:var(--line); text-decoration:line-through;}
   .stamp.vencido{color:var(--rust); border-color:var(--rust); transform:rotate(2deg);}
   .stamp.pendiente{color:var(--dusty); border-color:var(--dusty);}
   .stamp.lista{color:var(--sage); border-color:var(--sage);}

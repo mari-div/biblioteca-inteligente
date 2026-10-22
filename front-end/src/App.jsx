@@ -108,7 +108,8 @@ export default function App() {
     { id: "dashboard", label: "Panel", icon: "dashboard" },
     { id: "catalogo", label: "Catálogo", icon: "book", count: libros.items.length },
     canManageUsuarios && { id: "usuarios", label: "Usuarios", icon: "users", count: usuarios.items.length },
-    { id: "prestamos", label: canSeeAll ? "Préstamos" : "Mis préstamos", icon: "exchange", count: store.prestamos.items.filter((p) => p.estado === "activo").length },
+    // Para el personal, el número del menú son las solicitudes por revisar; para el lector, lo que tiene en curso.
+    { id: "prestamos", label: canSeeAll ? "Préstamos" : "Mis préstamos", icon: "exchange", count: store.prestamos.items.filter((p) => (canSeeAll ? p.estado === "solicitado" : p.estado === "activo" || p.estado === "solicitado")).length || undefined },
     { id: "reservas", label: canSeeAll ? "Reservas" : "Mis reservas", icon: "bookmark", count: store.reservas.items.filter((r) => r.estado !== "cancelada").length },
     { id: "recomendaciones", label: "Recomendaciones", icon: "sparkles" },
     { id: "notificaciones", label: "Notificaciones", icon: "bell", count: store.notificaciones.items.filter((n) => !n.leida && n.idUsuario === viewer?.idUsuario).length || undefined },

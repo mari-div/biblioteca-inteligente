@@ -131,5 +131,25 @@ export function useEntity(name, idField, seed, mode, baseUrl, pushToast, token, 
     [mode, baseUrl, name, idField, pushToast, authHeaders, handleHttpError]
   );
 
-  return { items, setItems, loading, create, update, remove, refresh };
+  // Acción propia de un recurso, p. ej. PUT /prestamos/5/aprobar. En demo aplica `demoPatch` localmente.
+  const action = useCallback(
+    async (id, path, demoPatch) => {
+      if (mode === "demo") {
+        setItems((prev) => prev.map((i) => (i[idField] === id ? { ...i, ...demoPatch } : i)));
+        return;
+      }
+      try {
+        const res = await fetch(`${baseUrl}/${name}/${id}/${path}`, { method: "PUT", headers: authHeaders() });
+        if (!res.ok) return handleHttpError(res);
+        const record = await res.json();
+        setItems((prev) => prev.map((i) => (i[idField] === id ? record : i)));
+      } catch (err) {
+        pushToast("error", `No se pudo completar la acción (${err.message}).`);
+        throw err;
+      }
+    },
+    [mode, baseUrl, name, idField, pushToast, authHeaders, handleHttpError]
+  );
+
+  return { items, setItems, loading, create, update, remove, refresh, action };
 }

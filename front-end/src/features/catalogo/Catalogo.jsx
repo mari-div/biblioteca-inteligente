@@ -36,6 +36,18 @@ export default function Catalogo({ store, viewer, mode, canManage, onManage, pus
   };
 
   // El hook ya avisa del error (por ejemplo, una regla de negocio), así que aquí solo se evita seguir.
+  const yaSolicitado = (libro) =>
+    prestamos.items.some((p) => p.idLibro === libro.idLibro && p.idUsuario === viewer?.idUsuario && p.estado === "solicitado");
+
+  // El lector no presta directamente: envía una solicitud que el bibliotecario aprueba al entregar el libro.
+  const solicitar = async (libro) => {
+    if (!viewer) return;
+    try {
+      await prestamos.create({ idUsuario: viewer.idUsuario, idLibro: libro.idLibro, fechaPrestamo: iso(today), estado: "solicitado" });
+      pushToast("success", "Solicitud enviada. El bibliotecario la revisará y te avisará.");
+    } catch { /* ya notificado */ }
+  };
+
   const quickPrestar = async (libro) => {
     if (!viewer) return;
     try {
@@ -43,7 +55,7 @@ export default function Catalogo({ store, viewer, mode, canManage, onManage, pus
       // En modo live el backend ya marca el libro como no disponible; solo se vuelve a leer.
       if (mode === "demo") await libros.update(libro.idLibro, { ...libro, disponible: false });
       else await libros.refresh();
-      pushToast("success", canManage ? `Préstamo registrado para ${viewer.nombre}.` : "Préstamo registrado. ¡Disfruta tu lectura!");
+      pushToast("success", `Préstamo registrado para ${viewer.nombre}.`);
     } catch { /* ya notificado */ }
   };
   const quickReservar = async (libro) => {
@@ -115,8 +127,12 @@ export default function Catalogo({ store, viewer, mode, canManage, onManage, pus
                 </div>
                 <div className="book-actions">
                   <button className="btn btn-sm" onClick={() => setDetail(l)}>Ver ficha</button>
-                  {l.disponible ? (
-                    <button className="btn btn-sm btn-primary" onClick={() => quickPrestar(l)}>{canManage ? "Prestar" : "Pedir prestado"}</button>
+                  {l.disponible && canManage ? (
+                    <button className="btn btn-sm btn-primary" onClick={() => quickPrestar(l)}>Prestar</button>
+                  ) : l.disponible && yaSolicitado(l) ? (
+                    <button className="btn btn-sm" disabled>Solicitado</button>
+                  ) : l.disponible ? (
+                    <button className="btn btn-sm btn-primary" onClick={() => solicitar(l)}>Solicitar préstamo</button>
                   ) : (
                     <button className="btn btn-sm" onClick={() => quickReservar(l)}>Reservar</button>
                   )}
