@@ -10,7 +10,7 @@ const COLS = [
   { id: "cancelada", label: "Canceladas" },
 ];
 
-export default function Reservas({ store, viewer, canManage, pushToast }) {
+export default function Reservas({ store, canManage, pushToast }) {
   const { reservas, usuarios, libros } = store;
   const [creating, setCreating] = useState(false);
 
@@ -72,7 +72,7 @@ export default function Reservas({ store, viewer, canManage, pushToast }) {
 
       {creating && (
         <Modal title="Nueva reserva" onClose={() => setCreating(false)}>
-          <ReservaForm usuarios={usuarios.items} libros={libros.items} defaultUsuario={viewer?.idUsuario} onSubmit={save} onCancel={() => setCreating(false)} />
+          <ReservaForm usuarios={usuarios.items.filter((u) => u.rol === "lector")} libros={libros.items} onSubmit={save} onCancel={() => setCreating(false)} />
         </Modal>
       )}
     </>
