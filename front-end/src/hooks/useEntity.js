@@ -14,8 +14,9 @@ import { readLocal, writeLocal } from "../utils/storage.js";
  * @param {(type:string, msg:string)=>void} pushToast
  * @param {string|null} token  token JWT de la sesión actual (solo aplica en modo "live")
  * @param {()=>void} onUnauthorized  se llama si el backend responde 401 (sesión vencida/ inválida)
+ * @param {boolean} enabled  en modo "live", false evita pedir el recurso (el rol no tiene acceso)
  */
-export function useEntity(name, idField, seed, mode, baseUrl, pushToast, token, onUnauthorized) {
+export function useEntity(name, idField, seed, mode, baseUrl, pushToast, token, onUnauthorized, enabled = true) {
   const storageKey = "bi_demo_" + name;
   const [items, setItems] = useState(() => readLocal(storageKey, seed));
   const [loading, setLoading] = useState(false);
@@ -39,7 +40,7 @@ export function useEntity(name, idField, seed, mode, baseUrl, pushToast, token, 
   }, [items, mode, storageKey]);
 
   const refresh = useCallback(async () => {
-    if (mode !== "live") return;
+    if (mode !== "live" || !enabled) return;
     setLoading(true);
     try {
       const res = await fetch(`${baseUrl}/${name}`, { headers: authHeaders() });
@@ -51,12 +52,14 @@ export function useEntity(name, idField, seed, mode, baseUrl, pushToast, token, 
     } finally {
       setLoading(false);
     }
-  }, [mode, baseUrl, name, pushToast, authHeaders, handleHttpError]);
+  }, [mode, baseUrl, name, enabled, pushToast, authHeaders, handleHttpError]);
 
   useEffect(() => {
-    if (mode === "live" && token) refresh();
+    if (mode !== "live") return;
+    if (!enabled) { setItems([]); return; }
+    if (token) refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, baseUrl, token]);
+  }, [mode, baseUrl, token, enabled]);
 
   const create = useCallback(
     async (payload) => {
@@ -128,5 +131,25 @@ export function useEntity(name, idField, seed, mode, baseUrl, pushToast, token, 
     [mode, baseUrl, name, idField, pushToast, authHeaders, handleHttpError]
   );
 
-  return { items, setItems, loading, create, update, remove, refresh };
+  // Acción propia de un recurso, p. ej. PUT /prestamos/5/aprobar. En demo aplica `demoPatch` localmente.
+  const action = useCallback(
+    async (id, path, demoPatch) => {
+      if (mode === "demo") {
+        setItems((prev) => prev.map((i) => (i[idField] === id ? { ...i, ...demoPatch } : i)));
+        return;
+      }
+      try {
+        const res = await fetch(`${baseUrl}/${name}/${id}/${path}`, { method: "PUT", headers: authHeaders() });
+        if (!res.ok) return handleHttpError(res);
+        const record = await res.json();
+        setItems((prev) => prev.map((i) => (i[idField] === id ? record : i)));
+      } catch (err) {
+        pushToast("error", `No se pudo completar la acción (${err.message}).`);
+        throw err;
+      }
+    },
+    [mode, baseUrl, name, idField, pushToast, authHeaders, handleHttpError]
+  );
+
+  return { items, setItems, loading, create, update, remove, refresh, action };
 }

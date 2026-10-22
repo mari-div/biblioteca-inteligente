@@ -3,11 +3,13 @@ import Modal from "../../components/common/Modal.jsx";
 import Icon from "../../components/Icon.jsx";
 import EmptyState from "../../components/common/EmptyState.jsx";
 import PrestamoForm from "./PrestamoForm.jsx";
-import { today, iso, fmtDate } from "../../utils/dates.js";
+import { today, iso, addDays, fmtDate } from "../../utils/dates.js";
 
 export default function Prestamos({ store, viewer, canManage, pushToast }) {
-  const { prestamos, usuarios, libros } = store;
-  const [estadoFilter, setEstadoFilter] = useState("todos");
+  const { prestamos, usuarios, libros, notificaciones } = store;
+  const pendientes = prestamos.items.filter((p) => p.estado === "solicitado").length;
+  // El bibliotecario entra directo a las solicitudes por revisar, si las hay.
+  const [estadoFilter, setEstadoFilter] = useState(() => (canManage && pendientes ? "solicitado" : "todos"));
   const [editing, setEditing] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
 
@@ -29,6 +31,24 @@ export default function Prestamos({ store, viewer, canManage, pushToast }) {
     setEditing(null);
   };
 
+  const aprobar = async (p) => {
+    try {
+      await prestamos.action(p.idPrestamo, "aprobar", { estado: "activo", fechaPrestamo: iso(today), fechaDevolucion: iso(addDays(today, 14)) });
+      const libro = libros.items.find((l) => l.idLibro === p.idLibro);
+      if (libro) await libros.update(libro.idLibro, { ...libro, disponible: false });
+      notificaciones.refresh();
+      pushToast("success", "Préstamo aprobado. Entrega el libro al lector.");
+    } catch { /* ya notificado */ }
+  };
+
+  const rechazar = async (p) => {
+    try {
+      await prestamos.action(p.idPrestamo, "rechazar", { estado: "rechazado" });
+      notificaciones.refresh();
+      pushToast("success", "Solicitud rechazada.");
+    } catch { /* ya notificado */ }
+  };
+
   const marcarDevuelto = async (p) => {
     await prestamos.update(p.idPrestamo, { ...p, estado: "devuelto" });
     const libro = libros.items.find((l) => l.idLibro === p.idLibro);
@@ -41,9 +61,11 @@ export default function Prestamos({ store, viewer, canManage, pushToast }) {
       <div className="section-head">
         <select className="filter" value={estadoFilter} onChange={(ev) => setEstadoFilter(ev.target.value)}>
           <option value="todos">Todos los estados</option>
+          <option value="solicitado">{canManage ? `Solicitudes por revisar (${pendientes})` : "Solicitados"}</option>
           <option value="activo">Activos</option>
           <option value="vencido">Vencidos</option>
           <option value="devuelto">Devueltos</option>
+          <option value="rechazado">Rechazados</option>
         </select>
         {canManage && (
           <button className="btn btn-primary" onClick={() => setEditing("new")}>
@@ -56,36 +78,45 @@ export default function Prestamos({ store, viewer, canManage, pushToast }) {
         <div className="table-wrap">
           <table>
             <thead>
-              <tr><th>Libro</th><th>Usuario</th><th>Prestado</th><th>Devolución</th><th>Estado</th><th></th></tr>
+              <tr>
+                <th>Libro</th>
+                {canManage && <th>Usuario</th>}
+                <th>Prestado</th><th>Devolución</th><th>Estado</th>
+                {canManage && <th></th>}
+              </tr>
             </thead>
             <tbody>
               {filtered.map((p) => (
                 <tr key={p.idPrestamo}>
                   <td>{bookTitle(p.idLibro)}</td>
-                  <td>{userName(p.idUsuario)}</td>
+                  {canManage && <td>{userName(p.idUsuario)}</td>}
                   <td>{fmtDate(p.fechaPrestamo)}</td>
                   <td>{fmtDate(p.fechaDevolucion)}</td>
                   <td><span className={"stamp " + (p.vencido ? "vencido" : p.estado)}>{p.vencido ? "vencido" : p.estado}</span></td>
-                  <td>
-                    <div className="row-actions">
-                      {canManage ? (
-                        <>
-                          {p.estado === "activo" && <button className="btn btn-sm" onClick={() => marcarDevuelto(p)}>Marcar devuelto</button>}
+                  {canManage && (
+                    <td>
+                      <div className="row-actions">
+                        {p.estado === "solicitado" && (
+                          <>
+                            <button className="btn btn-sm btn-primary" onClick={() => aprobar(p)}>Aprobar</button>
+                            <button className="btn btn-sm btn-danger" onClick={() => rechazar(p)}>Rechazar</button>
+                          </>
+                        )}
+                        {p.estado === "activo" && <button className="btn btn-sm" onClick={() => marcarDevuelto(p)}>Marcar devuelto</button>}
+                        {(p.estado === "activo" || p.estado === "devuelto") && (
                           <button className="icon-btn" onClick={() => setEditing(p)}><Icon name="edit" size={14} /></button>
-                          <button className="icon-btn" onClick={() => setConfirmDelete(p)}><Icon name="trash" size={14} /></button>
-                        </>
-                      ) : (
-                        <span style={{ fontSize: "12px", color: "var(--muted)" }}>—</span>
-                      )}
-                    </div>
-                  </td>
+                        )}
+                        <button className="icon-btn" onClick={() => setConfirmDelete(p)}><Icon name="trash" size={14} /></button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       ) : (
-        <div className="card"><EmptyState title="No hay préstamos en este estado" sub="Registra uno nuevo con el botón de arriba." /></div>
+        <div className="card"><EmptyState title="No hay préstamos en este estado" sub={canManage ? "Registra uno nuevo con el botón de arriba." : "Pide prestado un libro desde el Catálogo."} /></div>
       )}
 
       {editing && (

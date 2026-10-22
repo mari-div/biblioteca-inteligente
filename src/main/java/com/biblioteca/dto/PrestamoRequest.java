@@ -19,7 +19,7 @@ public class PrestamoRequest {
     private LocalDate fechaDevolucion;
 
     @NotNull(message = "El estado es obligatorio")
-    @Pattern(regexp = "activo|devuelto", message = "El estado debe ser 'activo' o 'devuelto'")
+    @Pattern(regexp = "solicitado|activo|devuelto|rechazado", message = "El estado debe ser 'solicitado', 'activo', 'devuelto' o 'rechazado'")
     private String estado;
 
     public PrestamoRequest() {
@@ -64,4 +64,4 @@ public class PrestamoRequest {
     public void setEstado(String estado) {
         this.estado = estado;
     }
-}
+}

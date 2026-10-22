@@ -2,24 +2,27 @@ import { genreColor } from "../../utils/format.js";
 import { today, iso, fmtDate, fmtRelative } from "../../utils/dates.js";
 import EmptyState from "../../components/common/EmptyState.jsx";
 
-export default function Dashboard({ store }) {
+export default function Dashboard({ store, viewer }) {
   const { libros, usuarios, prestamos, reservas, generos, notificaciones } = store;
 
+  const esPersonal = viewer?.rol === "bibliotecario" || viewer?.rol === "administrador";
+  const esAdmin = viewer?.rol === "administrador";
   const disponibles = libros.items.filter((l) => l.disponible).length;
   const activos = prestamos.items.filter((p) => p.estado === "activo").length;
   const vencidos = prestamos.items.filter((p) => p.estado === "activo" && p.fechaDevolucion < iso(today)).length;
+  const solicitudes = prestamos.items.filter((p) => p.estado === "solicitado").length;
   const pendientesReserva = reservas.items.filter((r) => r.estado === "pendiente").length;
 
   const byGenre = generos.items.map((g) => ({ ...g, count: libros.items.filter((l) => l.idGenero === g.idGenero).length }));
   const maxCount = Math.max(1, ...byGenre.map((g) => g.count));
 
-  const recentLoans = [...prestamos.items].sort((a, b) => (a.fechaPrestamo < b.fechaPrestamo ? 1 : -1)).slice(0, 5);
+  const recentLoans = prestamos.items.filter((p) => p.estado === "activo" || p.estado === "devuelto").sort((a, b) => (a.fechaPrestamo < b.fechaPrestamo ? 1 : -1)).slice(0, 5);
   const dueSoon = prestamos.items
     .filter((p) => p.estado === "activo")
     .sort((a, b) => (a.fechaDevolucion > b.fechaDevolucion ? 1 : -1))
     .slice(0, 5);
 
-  const userName = (id) => usuarios.items.find((u) => u.idUsuario === id)?.nombre || "—";
+  const userName = (id) => (id === viewer?.idUsuario && !esPersonal ? "Tú" : usuarios.items.find((u) => u.idUsuario === id)?.nombre || "—");
   const bookTitle = (id) => libros.items.find((l) => l.idLibro === id)?.titulo || "—";
 
   return (
@@ -31,21 +34,21 @@ export default function Dashboard({ store }) {
           <div className="stat-sub">{disponibles} disponibles hoy</div>
         </div>
         <div className="card stat-card">
-          <div className="stat-label">Préstamos activos</div>
+          <div className="stat-label">{esPersonal ? "Préstamos activos" : "Mis préstamos activos"}</div>
           <div className="stat-num">{activos}</div>
           <div className="stat-sub" style={vencidos ? { color: "var(--rust)" } : undefined}>
-            {vencidos ? `${vencidos} vencidos` : "Al día"}
+            {[vencidos ? `${vencidos} vencidos` : "Al día", solicitudes ? `${solicitudes} ${esPersonal ? "por aprobar" : "en espera"}` : null].filter(Boolean).join(" · ")}
           </div>
         </div>
         <div className="card stat-card">
-          <div className="stat-label">Reservas pendientes</div>
+          <div className="stat-label">{esPersonal ? "Reservas pendientes" : "Mis reservas pendientes"}</div>
           <div className="stat-num">{pendientesReserva}</div>
           <div className="stat-sub">{reservas.items.length} en total</div>
         </div>
         <div className="card stat-card">
-          <div className="stat-label">Usuarios registrados</div>
-          <div className="stat-num">{usuarios.items.length}</div>
-          <div className="stat-sub">{notificaciones.items.filter((n) => !n.leida).length} notificaciones sin leer</div>
+          <div className="stat-label">{esAdmin ? "Usuarios registrados" : "Notificaciones sin leer"}</div>
+          <div className="stat-num">{esAdmin ? usuarios.items.length : notificaciones.items.filter((n) => !n.leida).length}</div>
+          <div className="stat-sub">{esAdmin ? `${notificaciones.items.filter((n) => !n.leida).length} notificaciones sin leer` : "Revisa la sección Notificaciones"}</div>
         </div>
       </div>
 
@@ -80,7 +83,7 @@ export default function Dashboard({ store }) {
             recentLoans.map((p) => (
               <div key={p.idPrestamo} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--line-soft)", fontSize: "13px" }}>
                 <span>
-                  <strong style={{ fontWeight: 600 }}>{userName(p.idUsuario)}</strong> tomó prestado {bookTitle(p.idLibro)}
+                  <strong style={{ fontWeight: 600 }}>{userName(p.idUsuario)}</strong> {userName(p.idUsuario) === "Tú" ? "tomaste" : "tomó"} prestado {bookTitle(p.idLibro)}
                 </span>
                 <span style={{ color: "var(--muted)" }}>{fmtRelative(p.fechaPrestamo)}</span>
               </div>

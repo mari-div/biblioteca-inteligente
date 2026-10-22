@@ -34,7 +34,7 @@ public class UsuarioActual {
         }
     }
 
-    private boolean esPersonal(Authentication authentication) {
+    public boolean esPersonal(Authentication authentication) {
         for (GrantedAuthority autoridad : authentication.getAuthorities()) {
             String rol = autoridad.getAuthority();
             if (rol.equals("ROLE_BIBLIOTECARIO") || rol.equals("ROLE_ADMINISTRADOR")) {

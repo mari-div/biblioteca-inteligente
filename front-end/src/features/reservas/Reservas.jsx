@@ -23,7 +23,9 @@ export default function Reservas({ store, viewer, canManage, pushToast }) {
   return (
     <>
       <div className="section-head">
-        <div />
+        <div style={{ color: "var(--muted)", fontSize: "13px" }}>
+          {canManage ? "" : "Para reservar un libro prestado, ve al Catálogo."}
+        </div>
         {canManage && (
           <button className="btn btn-primary" onClick={() => setCreating(true)}>
             <Icon name="plus" size={15} /> Nueva reserva
@@ -41,7 +43,7 @@ export default function Reservas({ store, viewer, canManage, pushToast }) {
                 items.map((r) => (
                   <div key={r.idReserva} className="res-card">
                     <div className="titulo">{bookTitle(r.idLibro)}</div>
-                    <div className="meta">{userName(r.idUsuario)} · {fmtDate(r.fechaReserva)}</div>
+                    <div className="meta">{canManage ? `${userName(r.idUsuario)} · ` : ""}{fmtDate(r.fechaReserva)}</div>
                     {canManage && (
                       <div className="actions">
                         {col.id === "pendiente" && (

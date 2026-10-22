@@ -107,7 +107,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/libros/**", "/api/autores/**", "/api/generos/**")
                             .hasAnyRole("BIBLIOTECARIO", "ADMINISTRADOR")
 
-                        // Usuarios: administración exclusiva del rol administrador
+                        // Usuarios: el personal puede consultarlos (p. ej. para registrar un préstamo
+                        // a nombre de un lector); crear, editar y borrar es exclusivo del administrador
+                        .requestMatchers(HttpMethod.GET, "/api/usuarios/**").hasAnyRole("BIBLIOTECARIO", "ADMINISTRADOR")
                         .requestMatchers("/api/usuarios/**").hasRole("ADMINISTRADOR")
 
                         // Préstamos y reservas: cualquiera puede solicitar los suyos,

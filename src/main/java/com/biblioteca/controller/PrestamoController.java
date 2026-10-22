@@ -38,6 +38,10 @@ public class PrestamoController {
     @ResponseStatus(HttpStatus.CREATED)
     public Prestamo guardar(@Valid @RequestBody PrestamoRequest request, Authentication authentication) {
         usuarioActual.exigirPropio(authentication, request.getIdUsuario());
+        // El lector solo envía solicitudes; el personal las aprueba o registra préstamos en mostrador
+        if (!usuarioActual.esPersonal(authentication)) {
+            request.setEstado(PrestamoService.SOLICITADO);
+        }
         return prestamoService.registrar(request);
     }
 
@@ -47,6 +51,16 @@ public class PrestamoController {
             @Valid @RequestBody PrestamoRequest request) {
 
         return prestamoService.actualizar(id, request);
+    }
+
+    @PutMapping("/{id}/aprobar")
+    public Prestamo aprobar(@PathVariable Long id) {
+        return prestamoService.aprobar(id);
+    }
+
+    @PutMapping("/{id}/rechazar")
+    public Prestamo rechazar(@PathVariable Long id) {
+        return prestamoService.rechazar(id);
     }
 
     @PutMapping("/{id}/devolver")

@@ -22,6 +22,15 @@ import {
   seedPrestamos, seedReservas, seedCalificaciones, seedNotificaciones, seedRecomendaciones,
 } from "./data/seed.js";
 
+const TITLES_LECTOR = {
+  dashboard: ["Mi panel", "Tu actividad en la biblioteca"],
+  catalogo: ["Catálogo", "Explora, pide prestado y reserva los libros disponibles"],
+  prestamos: ["Mis préstamos", "Tus préstamos y sus fechas de devolución"],
+  reservas: ["Mis reservas", "El estado de tus reservas"],
+  recomendaciones: ["Recomendaciones", "Sugerencias según tus calificaciones"],
+  notificaciones: ["Notificaciones", "Tus avisos de préstamos y reservas"],
+};
+
 const TITLES = {
   dashboard: ["Panel general", "Un vistazo rápido a la actividad de la biblioteca hoy"],
   catalogo: ["Catálogo", "Explora, presta y reserva los libros disponibles"],
@@ -59,17 +68,19 @@ export default function App() {
   const [catalogMgrOpen, setCatalogMgrOpen] = useState(false);
 
   const authArgs = [mode, baseUrl, pushToast, auth.token, onUnauthorized];
+  // En modo live, la lista de usuarios solo la entrega el backend al personal de biblioteca.
+  const puedeListarUsuarios = mode !== "live" || permissions.verTodosLosRegistros(auth.user?.rol);
   const autores = useEntity("autores", "idAutor", seedAutores, ...authArgs);
   const generos = useEntity("generos", "idGenero", seedGeneros, ...authArgs);
   const libros = useEntity("libros", "idLibro", seedLibros, ...authArgs);
-  const usuarios = useEntity("usuarios", "idUsuario", seedUsuarios, ...authArgs);
+  const usuarios = useEntity("usuarios", "idUsuario", seedUsuarios, ...authArgs, puedeListarUsuarios);
   const prestamos = useEntity("prestamos", "idPrestamo", seedPrestamos, ...authArgs);
   const reservas = useEntity("reservas", "idReserva", seedReservas, ...authArgs);
   const calificaciones = useEntity("calificaciones", "idCalificacion", seedCalificaciones, ...authArgs);
   const notificaciones = useEntity("notificaciones", "idNotificacion", seedNotificaciones, ...authArgs);
   const recomendaciones = useEntity("recomendaciones", "idRecomendacion", seedRecomendaciones, ...authArgs);
 
-  const store = { autores, generos, libros, usuarios, prestamos, reservas, calificaciones, notificaciones, recomendaciones };
+  const rawStore = { autores, generos, libros, usuarios, prestamos, reservas, calificaciones, notificaciones, recomendaciones };
 
   // En modo demo, "viendo como" simula cualquier usuario de ejemplo.
   // En modo live, el "viewer" es siempre la persona realmente logueada.
@@ -85,15 +96,23 @@ export default function App() {
   const canManageUsuarios = permissions.gestionarUsuarios(viewer?.rol);
   const canManagePrestamos = permissions.gestionarPrestamos(viewer?.rol);
   const canManageReservas = permissions.gestionarReservas(viewer?.rol);
+  const canSeeAll = permissions.verTodosLosRegistros(viewer?.rol);
+
+  // Un lector solo ve lo suyo; el personal de biblioteca ve todo.
+  const propios = (entity) => ({ ...entity, items: entity.items.filter((x) => x.idUsuario === viewer?.idUsuario) });
+  const store = canSeeAll
+    ? rawStore
+    : { ...rawStore, prestamos: propios(prestamos), reservas: propios(reservas), notificaciones: propios(notificaciones), recomendaciones: propios(recomendaciones) };
 
   const navItems = [
     { id: "dashboard", label: "Panel", icon: "dashboard" },
     { id: "catalogo", label: "Catálogo", icon: "book", count: libros.items.length },
     canManageUsuarios && { id: "usuarios", label: "Usuarios", icon: "users", count: usuarios.items.length },
-    { id: "prestamos", label: "Préstamos", icon: "exchange", count: prestamos.items.filter((p) => p.estado === "activo").length },
-    { id: "reservas", label: "Reservas", icon: "bookmark", count: reservas.items.filter((r) => r.estado !== "cancelada").length },
+    // Para el personal, el número del menú son las solicitudes por revisar; para el lector, lo que tiene en curso.
+    { id: "prestamos", label: canSeeAll ? "Préstamos" : "Mis préstamos", icon: "exchange", count: store.prestamos.items.filter((p) => (canSeeAll ? p.estado === "solicitado" : p.estado === "activo" || p.estado === "solicitado")).length || undefined },
+    { id: "reservas", label: canSeeAll ? "Reservas" : "Mis reservas", icon: "bookmark", count: store.reservas.items.filter((r) => r.estado !== "cancelada").length },
     { id: "recomendaciones", label: "Recomendaciones", icon: "sparkles" },
-    { id: "notificaciones", label: "Notificaciones", icon: "bell", count: notificaciones.items.filter((n) => !n.leida && n.idUsuario === viewer?.idUsuario).length || undefined },
+    { id: "notificaciones", label: "Notificaciones", icon: "bell", count: store.notificaciones.items.filter((n) => !n.leida && n.idUsuario === viewer?.idUsuario).length || undefined },
   ].filter(Boolean);
 
   useEffect(() => {
@@ -124,8 +143,8 @@ export default function App() {
 
         <div className="main">
           <Topbar
-            title={TITLES[tab][0]}
-            subtitle={TITLES[tab][1]}
+            title={canSeeAll ? TITLES[tab][0] : (TITLES_LECTOR[tab] || TITLES[tab])[0]}
+            subtitle={canSeeAll ? TITLES[tab][1] : (TITLES_LECTOR[tab] || TITLES[tab])[1]}
             mode={mode}
             usuarios={usuarios.items}
             viewerId={viewerId}
@@ -140,13 +159,13 @@ export default function App() {
           <div className="content">
             {tab === "dashboard" && <Dashboard store={store} viewer={viewer} />}
             {tab === "catalogo" && (
-              <Catalogo store={store} viewer={viewer} canManage={canManageCatalogo} onManage={() => setCatalogMgrOpen(true)} pushToast={pushToast} />
+              <Catalogo store={store} viewer={viewer} mode={mode} canManage={canManageCatalogo} onManage={() => setCatalogMgrOpen(true)} pushToast={pushToast} />
             )}
             {tab === "usuarios" && <Usuarios store={store} pushToast={pushToast} />}
             {tab === "prestamos" && <Prestamos store={store} viewer={viewer} canManage={canManagePrestamos} pushToast={pushToast} />}
             {tab === "reservas" && <Reservas store={store} viewer={viewer} canManage={canManageReservas} pushToast={pushToast} />}
             {tab === "recomendaciones" && <Recomendaciones store={store} viewer={viewer} pushToast={pushToast} />}
-            {tab === "notificaciones" && <Notificaciones store={store} viewer={viewer} pushToast={pushToast} />}
+            {tab === "notificaciones" && <Notificaciones store={store} viewer={viewer} canSend={permissions.enviarNotificaciones(viewer?.rol)} pushToast={pushToast} />}
           </div>
         </div>
       </div>
