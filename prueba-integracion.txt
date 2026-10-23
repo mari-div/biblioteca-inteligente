@@ -1,0 +1,1 @@
+Prueba de integración entre Jira KAN-12 y GitHub
