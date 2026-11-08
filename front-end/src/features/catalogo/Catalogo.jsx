@@ -78,15 +78,15 @@ export default function Catalogo({ store, viewer, mode, canManage, onManage, pus
         <div className="toolbar">
           <div className="search">
             <Icon name="search" size={15} />
-            <input value={q} onChange={(ev) => setQ(ev.target.value)} placeholder="Buscar por título o autor" />
+            <input type="search" aria-label="Buscar libros" value={q} onChange={(ev) => setQ(ev.target.value)} placeholder="Buscar por título o autor" />
           </div>
-          <select className="filter" value={genFilter} onChange={(ev) => setGenFilter(ev.target.value)}>
+          <select className="filter" aria-label="Filtrar por género" value={genFilter} onChange={(ev) => setGenFilter(ev.target.value)}>
             <option value="todos">Todos los géneros</option>
             {generos.items.map((g) => (
               <option key={g.idGenero} value={g.idGenero}>{g.nombre}</option>
             ))}
           </select>
-          <select className="filter" value={availFilter} onChange={(ev) => setAvailFilter(ev.target.value)}>
+          <select className="filter" aria-label="Filtrar por disponibilidad" value={availFilter} onChange={(ev) => setAvailFilter(ev.target.value)}>
             <option value="todos">Disponibilidad</option>
             <option value="disp">Disponibles</option>
             <option value="prest">Prestados</option>
@@ -108,22 +108,21 @@ export default function Catalogo({ store, viewer, mode, canManage, onManage, pus
             const autor = autores.items.find((a) => a.idAutor === l.idAutor);
             const genero = generos.items.find((g) => g.idGenero === l.idGenero);
             return (
-              <div key={l.idLibro} className="card book-card">
-                <BookCover libro={l} autor={autor?.nombre} />
-                <div className="book-top">
-                  <div>
-                    <div className="book-title">{l.titulo}</div>
-                    <div className="book-author">{autor?.nombre || "Autor desconocido"}</div>
-                  </div>
-                  <span className="isbn-tag">{l.isbn || "s/isbn"}</span>
+              <article key={l.idLibro} className="book-card">
+                {/* La portada y el título abren la ficha: el resto de la tarjeta queda para la acción. */}
+                <button type="button" className="book-cover-btn" aria-label={`Ver ficha de ${l.titulo}`} onClick={() => setDetail(l)}>
+                  <BookCover libro={l} autor={autor?.nombre} />
+                </button>
+                <div className="book-info">
+                  <button type="button" className="book-title" onClick={() => setDetail(l)}>{l.titulo}</button>
+                  <div className="book-author">{autor?.nombre || "Autor desconocido"}</div>
                 </div>
                 {genero && (
-                  <span className="genre-badge" style={{ background: genreColor(l.idGenero) + "22", color: genreColor(l.idGenero) }}>
+                  <span className="genre-badge" style={{ background: genreColor(l.idGenero) + "22" }}>
                     <span className="genre-dot" style={{ background: genreColor(l.idGenero) }} />
                     {genero.nombre}
                   </span>
                 )}
-                <div className="book-desc">{l.descripcion || "Sin descripción."}</div>
                 <div className="book-meta">
                   <span className="avail">
                     <span className={"dot " + (l.disponible ? "on" : "off")} />
@@ -132,7 +131,6 @@ export default function Catalogo({ store, viewer, mode, canManage, onManage, pus
                   <AvgStars items={calificaciones.items} idLibro={l.idLibro} />
                 </div>
                 <div className="book-actions">
-                  <button className="btn btn-sm" onClick={() => setDetail(l)}>Ver ficha</button>
                   {l.disponible && canManage ? (
                     <button className="btn btn-sm btn-primary" onClick={() => setPrestando(l)}>Prestar</button>
                   ) : l.disponible && yaSolicitado(l) ? (
@@ -144,16 +142,16 @@ export default function Catalogo({ store, viewer, mode, canManage, onManage, pus
                   )}
                   {canManage && (
                     <>
-                      <button className="icon-btn" title="Editar" onClick={() => setEditing(l)}>
+                      <button type="button" className="icon-btn sm" title="Editar" aria-label={`Editar ${l.titulo}`} onClick={() => setEditing(l)}>
                         <Icon name="edit" size={14} />
                       </button>
-                      <button className="icon-btn" title="Eliminar" onClick={() => setConfirmDelete(l)}>
+                      <button type="button" className="icon-btn sm" title="Eliminar" aria-label={`Eliminar ${l.titulo}`} onClick={() => setConfirmDelete(l)}>
                         <Icon name="trash" size={14} />
                       </button>
                     </>
                   )}
                 </div>
-              </div>
+              </article>
             );
           })}
         </div>

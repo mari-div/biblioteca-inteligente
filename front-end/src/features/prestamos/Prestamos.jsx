@@ -59,7 +59,7 @@ export default function Prestamos({ store, canManage, pushToast }) {
   return (
     <>
       <div className="section-head">
-        <select className="filter" value={estadoFilter} onChange={(ev) => setEstadoFilter(ev.target.value)}>
+        <select className="filter" aria-label="Filtrar por estado" value={estadoFilter} onChange={(ev) => setEstadoFilter(ev.target.value)}>
           <option value="todos">Todos los estados</option>
           <option value="solicitado">{canManage ? `Solicitudes por revisar (${pendientes})` : "Solicitados"}</option>
           <option value="activo">Activos</option>
@@ -104,9 +104,9 @@ export default function Prestamos({ store, canManage, pushToast }) {
                         )}
                         {p.estado === "activo" && <button className="btn btn-sm" onClick={() => marcarDevuelto(p)}>Marcar devuelto</button>}
                         {(p.estado === "activo" || p.estado === "devuelto") && (
-                          <button className="icon-btn" onClick={() => setEditing(p)}><Icon name="edit" size={14} /></button>
+                          <button type="button" className="icon-btn sm" title="Editar" aria-label="Editar préstamo" onClick={() => setEditing(p)}><Icon name="edit" size={14} /></button>
                         )}
-                        <button className="icon-btn" onClick={() => setConfirmDelete(p)}><Icon name="trash" size={14} /></button>
+                        <button type="button" className="icon-btn sm" title="Eliminar" aria-label="Eliminar préstamo" onClick={() => setConfirmDelete(p)}><Icon name="trash" size={14} /></button>
                       </div>
                     </td>
                   )}

@@ -26,51 +26,52 @@ export default function LibroDetailModal({ libro, store, viewer, onClose, pushTo
       <div className="book-detail-head">
         <BookCover libro={libro} autor={autor?.nombre} size="L" className="book-cover-lg" />
         <div>
-      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "10px" }}>
-        <span className="genre-badge" style={{ background: genreColor(libro.idGenero) + "22", color: genreColor(libro.idGenero) }}>
-          <span className="genre-dot" style={{ background: genreColor(libro.idGenero) }} />
-          {genero?.nombre || "Sin género"}
-        </span>
-        <span className="isbn-tag">{libro.isbn || "sin ISBN"}</span>
-      </div>
-      <p style={{ color: "var(--muted)", fontSize: "13px" }}>
-        de <strong style={{ color: "var(--text)", fontWeight: 600 }}>{autor?.nombre || "Autor desconocido"}</strong>
-      </p>
-      <p style={{ fontSize: "13.6px", marginTop: "8px" }}>{libro.descripcion || "Sin descripción disponible."}</p>
+          <div className="detail-tags">
+            <span className="genre-badge" style={{ background: genreColor(libro.idGenero) + "22" }}>
+              <span className="genre-dot" style={{ background: genreColor(libro.idGenero) }} />
+              {genero?.nombre || "Sin género"}
+            </span>
+            <span className="isbn-tag">{libro.isbn || "sin ISBN"}</span>
+          </div>
+          <p className="detail-author">
+            de <strong>{autor?.nombre || "Autor desconocido"}</strong>
+          </p>
+          <p className="detail-desc">{libro.descripcion || "Sin descripción disponible."}</p>
         </div>
       </div>
 
-      <div style={{ margin: "16px 0", borderTop: "1px solid var(--line)", paddingTop: "14px" }}>
-        <h4 style={{ fontSize: "14px", marginBottom: "10px" }}>Calificaciones de lectores ({rel.length})</h4>
+      <div className="detail-section">
+        <h4>Calificaciones de lectores ({rel.length})</h4>
         {rel.length ? (
           rel.map((c) => {
             const u = usuarios.items.find((x) => x.idUsuario === c.idUsuario);
             return (
-              <div key={c.idCalificacion} style={{ padding: "9px 0", borderBottom: "1px solid var(--line-soft)" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontWeight: 600, fontSize: "13px" }}>{c.idUsuario === viewer?.idUsuario ? "Tú" : u?.nombre || "Lector"}</span>
+              <div key={c.idCalificacion} className="review">
+                <div className="review-head">
+                  <span className="review-name">{c.idUsuario === viewer?.idUsuario ? "Tú" : u?.nombre || "Lector"}</span>
                   <StarRow value={c.puntuacion} onChange={() => {}} size={14} readOnly />
                 </div>
-                {c.comentario ? <p style={{ fontSize: "12.6px", color: "var(--muted)", marginTop: "3px" }}>{c.comentario}</p> : null}
+                {c.comentario ? <p className="review-text">{c.comentario}</p> : null}
               </div>
             );
           })
         ) : (
-          <p style={{ color: "var(--muted)", fontSize: "13px" }}>Aún nadie ha calificado este libro. Sé el primero.</p>
+          <p className="muted">Aún nadie ha calificado este libro. Sé el primero.</p>
         )}
       </div>
 
       {viewer && (
-        <div style={{ borderTop: "1px solid var(--line)", paddingTop: "14px" }}>
-          <h4 style={{ fontSize: "14px", marginBottom: "8px" }}>Calificar como {viewer.nombre}</h4>
+        <div className="detail-section">
+          <h4>Calificar como {viewer.nombre}</h4>
           <StarRow value={puntuacion} onChange={setPuntuacion} />
           <textarea
+            aria-label="Tu comentario"
             value={comentario}
             onChange={(ev) => setComentario(ev.target.value)}
             placeholder="¿Qué te pareció? (opcional)"
-            style={{ width: "100%", marginTop: "10px", border: "1px solid var(--line)", background: "var(--bg)", color: "var(--text)", borderRadius: "3px", padding: "9px", minHeight: "60px", fontFamily: "var(--font-body)" }}
+            style={{ marginTop: "12px" }}
           />
-          <button className="btn btn-primary" style={{ marginTop: "10px" }} onClick={submitRating}>Enviar calificación</button>
+          <button className="btn btn-primary" style={{ marginTop: "12px" }} onClick={submitRating}>Enviar calificación</button>
         </div>
       )}
     </Modal>

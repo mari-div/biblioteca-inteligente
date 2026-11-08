@@ -42,7 +42,9 @@ const TITLES = {
 };
 
 export default function App() {
-  const [theme, setTheme] = useState(() => readLocal("bi_theme", "dark"));
+  // Sin preferencia guardada se respeta el tema del sistema (antes se forzaba el oscuro).
+  const [theme, setTheme] = useState(() =>
+    readLocal("bi_theme", window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
   useEffect(() => { document.documentElement.setAttribute("data-theme", theme); writeLocal("bi_theme", theme); }, [theme]);
 
   const [mode, setMode] = useState(() => readLocal("bi_mode", "demo"));

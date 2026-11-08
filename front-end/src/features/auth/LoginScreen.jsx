@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Icon from "../../components/Icon.jsx";
 import BookCover from "../../components/common/BookCover.jsx";
+import Field from "../../components/common/Field.jsx";
 import { seedLibros } from "../../data/seed.js";
 
 // Antes de iniciar sesión la API no entrega libros, así que el mosaico usa el catálogo de ejemplo.
@@ -41,37 +42,34 @@ export default function LoginScreen({ onLogin, onRegister, onBackToDemo }) {
           <p className="login-tagline">Porque siempre hay un libro esperando por ti.</p>
 
           <div className="login-card">
-            <h2 style={{ fontSize: "18px", marginBottom: "4px" }}>{mode === "login" ? "Inicia sesión" : "Crea tu cuenta"}</h2>
-            <p style={{ color: "var(--muted)", fontSize: "13px", marginBottom: "18px" }}>
+            <h2>{mode === "login" ? "Inicia sesión" : "Crea tu cuenta"}</h2>
+            <p className="login-card-sub">
               {mode === "login" ? "Entra para ver tus préstamos y reservas." : "Regístrate como lector en un minuto."}
             </p>
 
             <form onSubmit={submit}>
               {mode === "register" && (
-                <div className="field">
-                  <label>Nombre completo</label>
-                  <input value={nombre} onChange={(ev) => setNombre(ev.target.value)} required />
-                </div>
+                <Field label="Nombre completo">
+                  <input value={nombre} autoComplete="name" onChange={(ev) => setNombre(ev.target.value)} required />
+                </Field>
               )}
-              <div className="field">
-                <label>Correo</label>
-                <input type="email" value={email} onChange={(ev) => setEmail(ev.target.value)} required />
-              </div>
-              <div className="field">
-                <label>Contraseña</label>
-                <input type="password" value={password} onChange={(ev) => setPassword(ev.target.value)} required minLength={6} />
-              </div>
+              <Field label="Correo">
+                <input type="email" value={email} autoComplete="email" onChange={(ev) => setEmail(ev.target.value)} required />
+              </Field>
+              <Field label="Contraseña">
+                <input type="password" value={password} autoComplete={mode === "login" ? "current-password" : "new-password"} onChange={(ev) => setPassword(ev.target.value)} required minLength={6} />
+              </Field>
 
-              {error && <p style={{ color: "var(--rust)", fontSize: "12.6px", marginBottom: "12px" }}>{error}</p>}
+              {error && <p className="form-error" role="alert">{error}</p>}
 
-              <button className="btn btn-primary" type="submit" disabled={loading} style={{ width: "100%", justifyContent: "center", marginBottom: "10px" }}>
+              <button className="btn btn-primary" type="submit" disabled={loading}>
                 {loading ? "Un momento..." : mode === "login" ? "Iniciar sesión" : "Crear cuenta"}
               </button>
             </form>
 
             <button
+              type="button"
               className="btn btn-ghost"
-              style={{ width: "100%", justifyContent: "center", fontSize: "12.6px" }}
               onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); }}
             >
               {mode === "login" ? "¿No tienes cuenta? Regístrate" : "¿Ya tienes cuenta? Inicia sesión"}

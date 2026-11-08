@@ -5,30 +5,36 @@ export default function Sidebar({ navItems, tab, setTab, mode, onOpenSettings })
     <aside className="sidebar">
       <div className="brand">
         <div className="brand-mark">
-          <Icon name="book" size={22} />
+          <Icon name="book" size={26} />
           <div>
             <div className="brand-title">Biblioteca</div>
             <div className="brand-title">Inteligente</div>
           </div>
         </div>
-        <div className="brand-sub">Avance 1 · Panel de gestión</div>
+        <div className="brand-sub">Panel de gestión</div>
       </div>
 
-      <nav className="nav">
+      <nav className="nav" aria-label="Secciones">
         {navItems.map((n) => (
-          <div key={n.id} className={"nav-item" + (tab === n.id ? " active" : "")} onClick={() => setTab(n.id)}>
-            <Icon name={n.icon} size={17} />
+          <button
+            key={n.id}
+            type="button"
+            className={"nav-item" + (tab === n.id ? " active" : "")}
+            aria-current={tab === n.id ? "page" : undefined}
+            onClick={() => setTab(n.id)}
+          >
+            <Icon name={n.icon} size={18} />
             <span>{n.label}</span>
             {n.count ? <span className="nav-count">{n.count}</span> : null}
-          </div>
+          </button>
         ))}
       </nav>
 
       <div className="sidebar-foot">
-        <div className="mode-pill" onClick={onOpenSettings}>
+        <button type="button" className="mode-pill" onClick={onOpenSettings}>
           <span className={"dot " + (mode === "live" ? "on" : "off")} />
           {mode === "live" ? "Conectado a tu API" : "Modo demostración"}
-        </div>
+        </button>
       </div>
     </aside>
   );

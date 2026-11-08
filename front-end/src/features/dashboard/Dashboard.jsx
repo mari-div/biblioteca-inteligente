@@ -36,7 +36,7 @@ export default function Dashboard({ store, viewer }) {
         <div className="card stat-card">
           <div className="stat-label">{esPersonal ? "Préstamos activos" : "Mis préstamos activos"}</div>
           <div className="stat-num">{activos}</div>
-          <div className="stat-sub" style={vencidos ? { color: "var(--rust)" } : undefined}>
+          <div className={"stat-sub" + (vencidos ? " warn" : "")}>
             {[vencidos ? `${vencidos} vencidos` : "Al día", solicitudes ? `${solicitudes} ${esPersonal ? "por aprobar" : "en espera"}` : null].filter(Boolean).join(" · ")}
           </div>
         </div>
@@ -55,9 +55,9 @@ export default function Dashboard({ store, viewer }) {
       <div className="card shelf-card">
         <div className="shelf-head">
           <h3>Colección por género</h3>
-          <span style={{ fontSize: "12px", color: "var(--muted)" }}>Pasa el cursor sobre cada lomo</span>
+          <span className="shelf-hint">Pasa el cursor sobre cada lomo</span>
         </div>
-        <p>La altura de cada libro representa cuántos títulos tienes de ese género.</p>
+        <p className="shelf-lead">La altura de cada libro representa cuántos títulos tienes de ese género.</p>
         <div className="shelf-row">
           {byGenre.map((g, i) => {
             const h = 40 + (g.count / maxCount) * 96;
@@ -65,6 +65,7 @@ export default function Dashboard({ store, viewer }) {
               <div
                 key={g.idGenero}
                 className="spine"
+                tabIndex={0}
                 style={{ width: 30 + (i % 3) * 6, height: h, background: genreColor(g.idGenero), animationDelay: i * 0.06 + "s" }}
               >
                 <span className="tip">{g.nombre} · {g.count}</span>
@@ -76,16 +77,16 @@ export default function Dashboard({ store, viewer }) {
         <div className="shelf-ledge-shadow" />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: "16px" }}>
-        <div className="card" style={{ padding: "16px 18px" }}>
-          <h3 style={{ fontSize: "15px", marginBottom: "10px" }}>Préstamos recientes</h3>
+      <div className="dash-split">
+        <div className="card panel">
+          <h3>Préstamos recientes</h3>
           {recentLoans.length ? (
             recentLoans.map((p) => (
-              <div key={p.idPrestamo} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--line-soft)", fontSize: "13px" }}>
+              <div key={p.idPrestamo} className="list-row">
                 <span>
-                  <strong style={{ fontWeight: 600 }}>{userName(p.idUsuario)}</strong> {userName(p.idUsuario) === "Tú" ? "tomaste" : "tomó"} prestado {bookTitle(p.idLibro)}
+                  <strong>{userName(p.idUsuario)}</strong> {userName(p.idUsuario) === "Tú" ? "tomaste" : "tomó"} prestado {bookTitle(p.idLibro)}
                 </span>
-                <span style={{ color: "var(--muted)" }}>{fmtRelative(p.fechaPrestamo)}</span>
+                <span className="when">{fmtRelative(p.fechaPrestamo)}</span>
               </div>
             ))
           ) : (
@@ -93,15 +94,15 @@ export default function Dashboard({ store, viewer }) {
           )}
         </div>
 
-        <div className="card" style={{ padding: "16px 18px" }}>
-          <h3 style={{ fontSize: "15px", marginBottom: "10px" }}>Próximas devoluciones</h3>
+        <div className="card panel">
+          <h3>Próximas devoluciones</h3>
           {dueSoon.length ? (
             dueSoon.map((p) => {
               const late = p.fechaDevolucion < iso(today);
               return (
-                <div key={p.idPrestamo} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--line-soft)", fontSize: "13px" }}>
+                <div key={p.idPrestamo} className="list-row">
                   <span>{bookTitle(p.idLibro)}</span>
-                  <span style={{ color: late ? "var(--rust)" : "var(--muted)" }}>{fmtDate(p.fechaDevolucion)}</span>
+                  <span className={"when" + (late ? " late" : "")}>{late ? "Vencido · " : ""}{fmtDate(p.fechaDevolucion)}</span>
                 </div>
               );
             })

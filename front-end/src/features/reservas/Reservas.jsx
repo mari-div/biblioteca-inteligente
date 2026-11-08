@@ -23,7 +23,7 @@ export default function Reservas({ store, canManage, pushToast }) {
   return (
     <>
       <div className="section-head">
-        <div style={{ color: "var(--muted)", fontSize: "13px" }}>
+        <div className="section-note">
           {canManage ? "" : "Para reservar un libro prestado, ve al Catálogo."}
         </div>
         {canManage && (
@@ -38,7 +38,7 @@ export default function Reservas({ store, canManage, pushToast }) {
           const items = reservas.items.filter((r) => r.estado === col.id);
           return (
             <div key={col.id} className="board-col">
-              <h4>{col.label}<span style={{ color: "var(--muted)" }}>{items.length}</span></h4>
+              <h4>{col.label}<span>{items.length}</span></h4>
               {items.length ? (
                 items.map((r) => (
                   <div key={r.idReserva} className="res-card">
@@ -63,7 +63,7 @@ export default function Reservas({ store, canManage, pushToast }) {
                   </div>
                 ))
               ) : (
-                <p style={{ fontSize: "12.4px", color: "var(--muted)" }}>Nada por aquí.</p>
+                <p className="muted">Nada por aquí.</p>
               )}
             </div>
           );
