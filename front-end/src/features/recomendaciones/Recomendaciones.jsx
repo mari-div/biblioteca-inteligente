@@ -43,7 +43,7 @@ export default function Recomendaciones({ store, viewer, pushToast }) {
             return (
               <div key={item.libro.idLibro} className="card rec-card">
                 {genero && (
-                  <span className="genre-badge" style={{ background: genreColor(item.libro.idGenero) + "22", color: genreColor(item.libro.idGenero) }}>
+                  <span className="genre-badge" style={{ background: genreColor(item.libro.idGenero) + "22" }}>
                     <span className="genre-dot" style={{ background: genreColor(item.libro.idGenero) }} />
                     {genero.nombre}
                   </span>
@@ -65,8 +65,8 @@ export default function Recomendaciones({ store, viewer, pushToast }) {
       )}
 
       {savedForViewer.length > 0 && (
-        <div style={{ marginTop: "26px" }}>
-          <h3 style={{ fontSize: "16px", marginBottom: "12px" }}>Recomendaciones guardadas</h3>
+        <div>
+          <h3 className="block-title">Recomendaciones guardadas</h3>
           <div className="table-wrap">
             <table>
               <thead><tr><th>Libro</th><th>Motivo</th><th>Fecha</th><th></th></tr></thead>
@@ -78,7 +78,7 @@ export default function Recomendaciones({ store, viewer, pushToast }) {
                       <td>{libro?.titulo || "—"}</td>
                       <td>{r.motivo}</td>
                       <td>{fmtDate(r.fecha)}</td>
-                      <td><button className="icon-btn" onClick={() => recomendaciones.remove(r.idRecomendacion)}><Icon name="trash" size={14} /></button></td>
+                      <td><button type="button" className="icon-btn sm" aria-label="Quitar recomendación" title="Quitar" onClick={() => recomendaciones.remove(r.idRecomendacion)}><Icon name="trash" size={14} /></button></td>
                     </tr>
                   );
                 })}

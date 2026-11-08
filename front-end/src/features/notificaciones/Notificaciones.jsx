@@ -27,23 +27,23 @@ export default function Notificaciones({ store, viewer, canSend, pushToast }) {
   return (
     <>
       <div className="section-head">
-        <div style={{ color: "var(--muted)", fontSize: "13px" }}>{mine.filter((n) => !n.leida).length} sin leer de {mine.length}</div>
+        <div className="section-note">{mine.filter((n) => !n.leida).length} sin leer de {mine.length}</div>
         <button className="btn" onClick={marcarTodas} disabled={!mine.some((n) => !n.leida)}>Marcar todas como leídas</button>
       </div>
 
-      <div className="card" style={{ marginBottom: "18px" }}>
+      <div className="card" style={{ marginBottom: "20px" }}>
         {mine.length ? (
           mine.map((n) => (
             <div key={n.idNotificacion} className={"notif-item" + (n.leida ? "" : " unread")}>
               <Icon name="bell" size={15} />
               <div>
-                <span className="notif-tag" style={{ background: `var(--${TIPO_COLOR[n.tipo] || "muted"})22`, color: `var(--${TIPO_COLOR[n.tipo] || "muted"})` }}>
+                <span className="notif-tag" style={{ "--tag": `var(--${TIPO_COLOR[n.tipo] || "muted"})` }}>
                   {n.tipo}
                 </span>
                 <div className="notif-msg">{n.mensaje}</div>
                 <div className="notif-time">{fmtRelative(n.fecha)}</div>
               </div>
-              <button className="icon-btn notif-toggle" title={n.leida ? "Marcar como no leída" : "Marcar como leída"} onClick={() => toggle(n)}>
+              <button type="button" className="icon-btn sm notif-toggle" title={n.leida ? "Marcar como no leída" : "Marcar como leída"} aria-label={n.leida ? "Marcar como no leída" : "Marcar como leída"} onClick={() => toggle(n)}>
                 <Icon name={n.leida ? "mail" : "check"} size={14} />
               </button>
             </div>
@@ -53,16 +53,17 @@ export default function Notificaciones({ store, viewer, canSend, pushToast }) {
         )}
       </div>
 
-      {canSend && <div className="card" style={{ padding: "16px 18px" }}>
-        <h4 style={{ fontSize: "13.5px", marginBottom: "10px" }}>Enviar notificación de prueba a {viewer?.nombre || "—"}</h4>
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+      {canSend && <div className="card panel">
+        <h3>Enviar notificación de prueba a {viewer?.nombre || "—"}</h3>
+        <div className="notif-compose">
           <input
+            className="input"
+            aria-label="Mensaje de la notificación"
             value={mensaje}
             onChange={(ev) => setMensaje(ev.target.value)}
             placeholder="Mensaje"
-            style={{ flex: 1, minWidth: "220px", border: "1px solid var(--line)", background: "var(--bg)", color: "var(--text)", borderRadius: "3px", padding: "8px 10px" }}
           />
-          <select className="filter" value={tipo} onChange={(ev) => setTipo(ev.target.value)}>
+          <select className="filter" aria-label="Tipo de notificación" value={tipo} onChange={(ev) => setTipo(ev.target.value)}>
             {Object.keys(TIPO_COLOR).map((t) => <option key={t} value={t}>{t}</option>)}
           </select>
           <button className="btn btn-primary" onClick={enviar}>Enviar</button>
