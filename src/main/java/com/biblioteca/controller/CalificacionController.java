@@ -3,9 +3,7 @@ package com.biblioteca.controller;
 import com.biblioteca.dto.CalificacionRequest;
 import com.biblioteca.model.Calificacion;
 import com.biblioteca.service.CalificacionService;
-import com.biblioteca.security.UsuarioActual;
 import jakarta.validation.Valid;
-import org.springframework.security.core.Authentication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,11 +14,9 @@ import java.util.List;
 public class CalificacionController {
 
     private final CalificacionService calificacionService;
-    private final UsuarioActual usuarioActual;
 
-    public CalificacionController(CalificacionService calificacionService, UsuarioActual usuarioActual) {
+    public CalificacionController(CalificacionService calificacionService) {
         this.calificacionService = calificacionService;
-        this.usuarioActual = usuarioActual;
     }
 
     @GetMapping
@@ -37,10 +33,7 @@ public class CalificacionController {
 
     @PostMapping
     public Calificacion guardar(
-            @Valid @RequestBody CalificacionRequest request,
-            Authentication authentication) {
-
-        usuarioActual.exigirPropio(authentication, request.getIdUsuario());
+            @Valid @RequestBody CalificacionRequest request) {
 
         Calificacion calificacion = new Calificacion();
         calificacion.setIdUsuario(request.getIdUsuario());
@@ -70,4 +63,4 @@ public class CalificacionController {
         calificacionService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
-}
+}
