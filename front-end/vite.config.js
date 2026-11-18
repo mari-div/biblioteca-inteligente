@@ -10,7 +10,7 @@ export default defineConfig({
       // En desarrollo, todo lo que el frontend pida a /api se reenvía
       // a tu backend Spring Boot. Así evitas configurar CORS mientras programas.
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:8081',
         changeOrigin: true,
       },
     },

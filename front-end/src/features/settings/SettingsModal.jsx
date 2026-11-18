@@ -11,7 +11,8 @@ export default function SettingsModal({ mode, setMode, baseUrl, setBaseUrl, onCl
     setTesting(true);
     try {
       const res = await fetch(`${url}/libros`);
-      if (!res.ok) throw new Error("HTTP " + res.status);
+      // 401/403 significa que el backend respondió pero exige sesión: la conexión es válida.
+      if (!res.ok && res.status !== 401 && res.status !== 403) throw new Error("HTTP " + res.status);
       pushToast("success", "Conexión exitosa. El backend respondió correctamente.");
       setBaseUrl(url);
       setMode("live");
