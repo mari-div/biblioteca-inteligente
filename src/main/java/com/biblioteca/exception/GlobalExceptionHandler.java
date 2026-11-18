@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -19,7 +20,12 @@ public class GlobalExceptionHandler {
             RecursoNoEncontradoException ex,
             HttpServletRequest request) {
 
-        return construir(HttpStatus.NOT_FOUND, "Recurso no encontrado", ex.getMessage(), request);
+        return construir(
+                HttpStatus.NOT_FOUND,
+                "Recurso no encontrado",
+                ex.getMessage(),
+                request
+        );
     }
 
     @ExceptionHandler(ReglaNegocioException.class)
@@ -27,7 +33,12 @@ public class GlobalExceptionHandler {
             ReglaNegocioException ex,
             HttpServletRequest request) {
 
-        return construir(HttpStatus.CONFLICT, "Operación no permitida", ex.getMessage(), request);
+        return construir(
+                HttpStatus.CONFLICT,
+                "Operación no permitida",
+                ex.getMessage(),
+                request
+        );
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
@@ -56,6 +67,7 @@ public class GlobalExceptionHandler {
         );
     }
 
+    // Manejo mejorado de errores de validación
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> manejarValidaciones(
             MethodArgumentNotValidException ex,
@@ -65,12 +77,23 @@ public class GlobalExceptionHandler {
                 .getFieldErrors()
                 .stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .findFirst()
-                .orElse("Datos inválidos");
+                .distinct()
+                .sorted()
+                .collect(Collectors.joining("; "));
 
-        return construir(HttpStatus.BAD_REQUEST, "Error de validación", mensaje, request);
+        if (mensaje.isBlank()) {
+            mensaje = "Los datos enviados no cumplen con las validaciones requeridas";
+        }
+
+        return construir(
+                HttpStatus.BAD_REQUEST,
+                "Error de validación",
+                mensaje,
+                request
+        );
     }
 
+    // Construcción uniforme de respuestas de error
     private ResponseEntity<ErrorResponse> construir(
             HttpStatus estado,
             String error,
@@ -88,3 +111,4 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(estado).body(cuerpo);
     }
 }
+
