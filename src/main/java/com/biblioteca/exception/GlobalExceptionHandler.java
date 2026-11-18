@@ -1,6 +1,7 @@
 package com.biblioteca.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -67,7 +68,6 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // Manejo mejorado de errores de validación
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> manejarValidaciones(
             MethodArgumentNotValidException ex,
@@ -93,7 +93,27 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // Construcción uniforme de respuestas de error
+    // Manejo de errores en parámetros como los IDs.
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> manejarRestricciones(
+            ConstraintViolationException ex,
+            HttpServletRequest request) {
+
+        String mensaje = ex.getConstraintViolations()
+                .stream()
+                .map(error -> error.getMessage())
+                .distinct()
+                .sorted()
+                .collect(Collectors.joining("; "));
+
+        return construir(
+                HttpStatus.BAD_REQUEST,
+                "Error de validación",
+                mensaje,
+                request
+        );
+    }
+
     private ResponseEntity<ErrorResponse> construir(
             HttpStatus estado,
             String error,
@@ -111,4 +131,5 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(estado).body(cuerpo);
     }
 }
+
 
