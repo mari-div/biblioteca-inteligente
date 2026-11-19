@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class UsuarioService {
@@ -35,12 +36,19 @@ public class UsuarioService {
 
     public UsuarioResponse crear(UsuarioRequest request) {
         if (request.getPassword() == null || request.getPassword().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La contraseña es obligatoria");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "La contraseña es obligatoria"
+            );
         }
 
         String email = normalizarEmail(request.getEmail());
+
         if (usuarioRepository.existsByEmail(email)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe un usuario con el email " + email);
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Ya existe un usuario con el email " + email
+            );
         }
 
         Usuario usuario = new Usuario();
@@ -56,15 +64,19 @@ public class UsuarioService {
         Usuario usuario = obtener(id);
 
         String email = normalizarEmail(request.getEmail());
+
         if (usuarioRepository.existsByEmailAndIdUsuarioNot(email, id)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe otro usuario con el email " + email);
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Ya existe otro usuario con el email " + email
+            );
         }
 
         usuario.setNombre(request.getNombre().trim());
         usuario.setEmail(email);
         usuario.setRol(request.getRol());
 
-        // Contraseña vacía al editar = se mantiene la que ya tenía
+        // Si la contraseña está vacía, se conserva la anterior.
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
             usuario.setPassword(passwordEncoder.encode(request.getPassword()));
         }
@@ -78,10 +90,15 @@ public class UsuarioService {
 
     private Usuario obtener(Long id) {
         return usuarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNoEncontradoException("No existe el usuario con id " + id));
+                .orElseThrow(() ->
+                        new RecursoNoEncontradoException(
+                                "No existe el usuario con id " + id
+                        )
+                );
     }
 
     private String normalizarEmail(String email) {
-        return email.trim().toLowerCase();
+        return email.trim().toLowerCase(Locale.ROOT);
     }
 }
+

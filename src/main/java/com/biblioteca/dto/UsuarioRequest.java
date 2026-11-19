@@ -16,14 +16,19 @@ public class UsuarioRequest {
     @Size(max = 150, message = "El email no puede superar los 150 caracteres")
     private String email;
 
-    // Obligatoria al crear (lo comprueba UsuarioService). Al editar, si viene vacía se conserva la actual.
-    // Máximo 72: BCrypt ignora lo que pase de 72 bytes.
-    @Size(min = 6, max = 72, message = "La contraseña debe tener entre 6 y 72 caracteres")
+    // Permite dejar la contraseña vacía al editar.
+    // Si se proporciona una nueva, debe tener entre 6 y 72 caracteres.
+    @Pattern(
+            regexp = "^\\s*$|^.{6,72}$",
+            message = "La contraseña debe tener entre 6 y 72 caracteres"
+    )
     private String password;
 
     @NotBlank(message = "El rol es obligatorio")
-    @Pattern(regexp = "lector|bibliotecario|administrador",
-            message = "El rol debe ser 'lector', 'bibliotecario' o 'administrador'")
+    @Pattern(
+            regexp = "lector|bibliotecario|administrador",
+            message = "El rol debe ser 'lector', 'bibliotecario' o 'administrador'"
+    )
     private String rol;
 
     public UsuarioRequest() {
@@ -61,3 +66,4 @@ public class UsuarioRequest {
         this.rol = rol;
     }
 }
+

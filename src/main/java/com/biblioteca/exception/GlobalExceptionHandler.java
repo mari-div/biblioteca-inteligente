@@ -1,6 +1,7 @@
 package com.biblioteca.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -19,7 +21,12 @@ public class GlobalExceptionHandler {
             RecursoNoEncontradoException ex,
             HttpServletRequest request) {
 
-        return construir(HttpStatus.NOT_FOUND, "Recurso no encontrado", ex.getMessage(), request);
+        return construir(
+                HttpStatus.NOT_FOUND,
+                "Recurso no encontrado",
+                ex.getMessage(),
+                request
+        );
     }
 
     @ExceptionHandler(ReglaNegocioException.class)
@@ -27,7 +34,12 @@ public class GlobalExceptionHandler {
             ReglaNegocioException ex,
             HttpServletRequest request) {
 
-        return construir(HttpStatus.CONFLICT, "Operación no permitida", ex.getMessage(), request);
+        return construir(
+                HttpStatus.CONFLICT,
+                "Operación no permitida",
+                ex.getMessage(),
+                request
+        );
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
@@ -65,10 +77,41 @@ public class GlobalExceptionHandler {
                 .getFieldErrors()
                 .stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .findFirst()
-                .orElse("Datos inválidos");
+                .distinct()
+                .sorted()
+                .collect(Collectors.joining("; "));
 
-        return construir(HttpStatus.BAD_REQUEST, "Error de validación", mensaje, request);
+        if (mensaje.isBlank()) {
+            mensaje = "Los datos enviados no cumplen con las validaciones requeridas";
+        }
+
+        return construir(
+                HttpStatus.BAD_REQUEST,
+                "Error de validación",
+                mensaje,
+                request
+        );
+    }
+
+    // Manejo de errores en parámetros como los IDs.
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> manejarRestricciones(
+            ConstraintViolationException ex,
+            HttpServletRequest request) {
+
+        String mensaje = ex.getConstraintViolations()
+                .stream()
+                .map(error -> error.getMessage())
+                .distinct()
+                .sorted()
+                .collect(Collectors.joining("; "));
+
+        return construir(
+                HttpStatus.BAD_REQUEST,
+                "Error de validación",
+                mensaje,
+                request
+        );
     }
 
     private ResponseEntity<ErrorResponse> construir(
@@ -88,3 +131,5 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(estado).body(cuerpo);
     }
 }
+
+
