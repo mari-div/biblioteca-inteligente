@@ -73,7 +73,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        // En desarrollo el frontend corre en :5173 (Vite) y el backend en :8080.
+        // En desarrollo el frontend corre en :5173 (Vite) y el backend en :8765.
         // Si despliegas en otro dominio, agrégalo aquí.
         config.setAllowedOriginPatterns(List.of("http://localhost:*", "http://127.0.0.1:*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));

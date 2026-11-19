@@ -346,6 +346,8 @@ tbody tr:hover{background:var(--surface-2);}
 .field textarea, .modal textarea{resize:vertical; min-height:80px;}
 .field-row{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
 .hint{font-size:12px; color:var(--muted); margin-top:6px;}
+.hint-error{color:var(--rust); font-weight:500;}
+.field input[aria-invalid="true"]{border-color:var(--rust);}
 .checkline{display:flex; align-items:center; gap:10px; font-size:14px;}
 .checkline input{width:18px; height:18px; accent-color:var(--brass);}
 .form-error{color:var(--rust); font-size:13px; margin-bottom:12px;}
