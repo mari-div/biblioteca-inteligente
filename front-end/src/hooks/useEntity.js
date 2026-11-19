@@ -26,11 +26,14 @@ export function useEntity(name, idField, seed, mode, baseUrl, pushToast, token, 
     [token]
   );
 
+  // El backend explica el motivo en el campo "mensaje" (validaciones, reglas de negocio, duplicados);
+  // lo mostramos en vez de un "HTTP 400" que no dice qué corregir.
   const handleHttpError = useCallback(
-    (res) => {
+    async (res) => {
       if (res.status === 401 && onUnauthorized) onUnauthorized();
       if (res.status === 403) throw new Error("no tienes permiso para hacer esto con tu rol actual");
-      throw new Error("HTTP " + res.status);
+      const cuerpo = await res.json().catch(() => null);
+      throw new Error(cuerpo?.mensaje || "HTTP " + res.status);
     },
     [onUnauthorized]
   );
@@ -44,7 +47,7 @@ export function useEntity(name, idField, seed, mode, baseUrl, pushToast, token, 
     setLoading(true);
     try {
       const res = await fetch(`${baseUrl}/${name}`, { headers: authHeaders() });
-      if (!res.ok) return handleHttpError(res);
+      if (!res.ok) return await handleHttpError(res);
       const data = await res.json();
       setItems(data);
     } catch (err) {
@@ -78,7 +81,7 @@ export function useEntity(name, idField, seed, mode, baseUrl, pushToast, token, 
           headers: authHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify(payload),
         });
-        if (!res.ok) return handleHttpError(res);
+        if (!res.ok) return await handleHttpError(res);
         const record = await res.json();
         setItems((prev) => [...prev, record]);
         return record;
@@ -102,7 +105,7 @@ export function useEntity(name, idField, seed, mode, baseUrl, pushToast, token, 
           headers: authHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify(payload),
         });
-        if (!res.ok) return handleHttpError(res);
+        if (!res.ok) return await handleHttpError(res);
         const record = await res.json();
         setItems((prev) => prev.map((i) => (i[idField] === id ? record : i)));
       } catch (err) {
@@ -121,7 +124,7 @@ export function useEntity(name, idField, seed, mode, baseUrl, pushToast, token, 
       }
       try {
         const res = await fetch(`${baseUrl}/${name}/${id}`, { method: "DELETE", headers: authHeaders() });
-        if (!res.ok && res.status !== 204) return handleHttpError(res);
+        if (!res.ok && res.status !== 204) return await handleHttpError(res);
         setItems((prev) => prev.filter((i) => i[idField] !== id));
       } catch (err) {
         pushToast("error", `No se pudo eliminar el registro (${err.message}).`);
@@ -140,7 +143,7 @@ export function useEntity(name, idField, seed, mode, baseUrl, pushToast, token, 
       }
       try {
         const res = await fetch(`${baseUrl}/${name}/${id}/${path}`, { method: "PUT", headers: authHeaders() });
-        if (!res.ok) return handleHttpError(res);
+        if (!res.ok) return await handleHttpError(res);
         const record = await res.json();
         setItems((prev) => prev.map((i) => (i[idField] === id ? record : i)));
       } catch (err) {

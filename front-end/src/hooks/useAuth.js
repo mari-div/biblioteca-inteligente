@@ -6,6 +6,16 @@ import { readLocal, writeLocal } from "../utils/storage.js";
  * /register, GET /api/auth/me). El token se guarda en localStorage
  * para que la sesión sobreviva a un refresh de la página.
  */
+// Si algo distinto al backend contesta (otro servicio en el puerto, proxy mal apuntado),
+// la respuesta no es JSON: damos un mensaje útil en vez de "Unexpected token...".
+async function leerJson(res) {
+  try {
+    return await res.json();
+  } catch {
+    throw new Error(`No se pudo hablar con el backend (respuesta ${res.status} que no es de la API). Revisa que esté corriendo y que el puerto del proxy en vite.config.js coincida con server.port.`);
+  }
+}
+
 export function useAuth(baseUrl, mode) {
   const [token, setToken] = useState(() => readLocal("bi_token", null));
   const [user, setUser] = useState(() => readLocal("bi_auth_user", null));
@@ -39,7 +49,7 @@ export function useAuth(baseUrl, mode) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-    const data = await res.json();
+    const data = await leerJson(res);
     if (!res.ok) throw new Error(data.mensaje || "No se pudo iniciar sesión.");
     setToken(data.token);
     setUser({ idUsuario: data.idUsuario, nombre: data.nombre, email: data.email, rol: data.rol });
@@ -52,7 +62,7 @@ export function useAuth(baseUrl, mode) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombre, email, password }),
     });
-    const data = await res.json();
+    const data = await leerJson(res);
     if (!res.ok) throw new Error(data.mensaje || "No se pudo crear la cuenta.");
     setToken(data.token);
     setUser({ idUsuario: data.idUsuario, nombre: data.nombre, email: data.email, rol: data.rol });

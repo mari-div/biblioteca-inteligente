@@ -56,7 +56,7 @@ export default function SettingsModal({ mode, setMode, baseUrl, setBaseUrl, onCl
 
       <p className="hint" style={{ marginTop: "12px" }}>
         En desarrollo, deja <code>/api</code>: Vite reenvía esas peticiones a tu backend en{" "}
-        <code>http://localhost:8080</code> (mira <code>vite.config.js</code>), así que no necesitas CORS mientras
+        <code>http://localhost:8765</code> (mira <code>vite.config.js</code>), así que no necesitas CORS mientras
         programas. En producción, si sirves el build compilado desde el propio Spring Boot, tampoco lo necesitarás
         porque todo queda en el mismo origen.
       </p>

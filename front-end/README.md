@@ -37,7 +37,7 @@ y funciona en dos modos:
 ## Requisitos
 
 - Node.js 18 o superior
-- Tu backend de Spring Boot corriendo en `http://localhost:8080`
+- Tu backend de Spring Boot corriendo en `http://localhost:8765`
 
 ## Puesta en marcha (desarrollo)
 
@@ -59,13 +59,13 @@ Abre `http://localhost:5173`. Por defecto la app arranca en **modo demostración
 ```js
 server: {
   proxy: {
-    '/api': { target: 'http://localhost:8080', changeOrigin: true },
+    '/api': { target: 'http://localhost:8765', changeOrigin: true },
   },
 },
 ```
 
 Esto significa que cuando el frontend pide `/api/libros`, Vite se lo reenvía a
-`http://localhost:8080/api/libros` por detrás, así que el navegador nunca hace una petición
+`http://localhost:8765/api/libros` por detrás, así que el navegador nunca hace una petición
 "cross-origin" real. Si tu backend corre en otro puerto, cambia el `target` aquí.
 
 ## Build para producción
@@ -81,7 +81,7 @@ Genera la carpeta `dist/` con HTML/CSS/JS ya compilados y optimizados.
 1. Ejecuta `npm run build`.
 2. Copia **el contenido** de `dist/` (no la carpeta en sí) dentro de
    `src/main/resources/static/` de tu proyecto Spring Boot.
-3. Corre `mvn spring-boot:run`. Todo queda servido en `http://localhost:8080`, frontend y API en el mismo
+3. Corre `mvn spring-boot:run`. Todo queda servido en `http://localhost:8765`, frontend y API en el mismo
    origen — no necesitas `@CrossOrigin` en absoluto.
 4. En el frontend ya compilado, dentro del modal de conexión, la URL `/api` funciona directo.
 
